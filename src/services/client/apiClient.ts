@@ -1,4 +1,4 @@
-import type { CreateAgentDTO, CreateAgentInputDTO, UpdateAgentDTO, UpdateAgentInputDTO } from '../../schemas/agent.schema';
+import type { CreateAgentInputDTO, UpdateAgentInputDTO } from '../../schemas/agent.schema';
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -6,6 +6,11 @@ export interface ApiResponse<T = any> {
   message?: string;
   error?: string;
   id?: number;
+}
+
+export interface IngestResponse extends ApiResponse {
+  chunksIngested?: number;
+  sections?: number;
 }
 
 export class ApiError extends Error {
@@ -83,8 +88,8 @@ export class ApiClient {
     });
   }
 
-  async ingestarConocimiento(id: number, nombreArchivo: string, contenido: string) {
-    return this.request<ApiResponse>(`/agentes/${id}/conocimiento`, {
+  async ingestarConocimiento(id: number, nombreArchivo: string, contenido: string): Promise<IngestResponse> {
+    return this.request<IngestResponse>(`/agentes/${id}/conocimiento`, {
       method: 'POST',
       body: JSON.stringify({ nombreArchivo, contenido })
     });
