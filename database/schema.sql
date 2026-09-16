@@ -31,30 +31,34 @@ CREATE TABLE IF NOT EXISTS agente_habilidades (
     FOREIGN KEY (habilidad_id) REFERENCES habilidades(id) ON DELETE CASCADE
 );
 
--- 4. Documentos y Chunks de Conocimiento (.md) asignados a cada Agente
+-- 4. Documentos y Chunks de Conocimiento (.md) vinculados por Dominio / Habilidad o Agente
 CREATE TABLE IF NOT EXISTS agente_documentos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    agente_id INTEGER NOT NULL,
+    agente_id INTEGER,
+    dominio VARCHAR(50) NOT NULL DEFAULT 'transversal',
+    habilidad_id INTEGER,
     vector_id VARCHAR(64),
     nombre_archivo VARCHAR(150) NOT NULL,
     titulo_seccion VARCHAR(200) NOT NULL,
     contenido TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (agente_id) REFERENCES agentes(id) ON DELETE CASCADE
+    FOREIGN KEY (agente_id) REFERENCES agentes(id) ON DELETE CASCADE,
+    FOREIGN KEY (habilidad_id) REFERENCES habilidades(id) ON DELETE CASCADE
 );
 
 -- 5. Tabla virtual para búsqueda léxica rápida (FTS5)
 CREATE VIRTUAL TABLE IF NOT EXISTS fts_documentos USING fts5(
     documento_id UNINDEXED,
     agente_id UNINDEXED,
+    dominio UNINDEXED,
     titulo_seccion,
     contenido
 );
 
 -- 6. Triggers para sincronización automática entre agente_documentos y fts_documentos
 CREATE TRIGGER IF NOT EXISTS trg_documentos_insert AFTER INSERT ON agente_documentos BEGIN
-    INSERT INTO fts_documentos (documento_id, agente_id, titulo_seccion, contenido)
-    VALUES (new.id, new.agente_id, new.titulo_seccion, new.contenido);
+    INSERT INTO fts_documentos (documento_id, agente_id, dominio, titulo_seccion, contenido)
+    VALUES (new.id, new.agente_id, new.dominio, new.titulo_seccion, new.contenido);
 END;
 
 CREATE TRIGGER IF NOT EXISTS trg_documentos_delete AFTER DELETE ON agente_documentos BEGIN
@@ -63,6 +67,6 @@ END;
 
 CREATE TRIGGER IF NOT EXISTS trg_documentos_update AFTER UPDATE ON agente_documentos BEGIN
     UPDATE fts_documentos
-    SET titulo_seccion = new.titulo_seccion, contenido = new.contenido
+    SET dominio = new.dominio, titulo_seccion = new.titulo_seccion, contenido = new.contenido
     WHERE documento_id = old.id;
 END;

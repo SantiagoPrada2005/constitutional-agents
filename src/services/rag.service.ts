@@ -52,15 +52,21 @@ export class RagService {
   }
 
   /**
-   * Ingest a markdown file for an agent: chunks, embeddings, Vectorize and D1 (FTS5)
+   * Ingest a markdown file for an agent or domain: chunks, embeddings, Vectorize and D1 (FTS5)
    */
-  async ingestDocument(agenteId: number, nombreArchivo: string, contenido: string) {
+  async ingestDocument(
+    agenteId: number | null,
+    nombreArchivo: string,
+    contenido: string,
+    dominio = 'transversal',
+    habilidadId?: number | null
+  ) {
     const sections = this.splitMarkdownIntoSections(contenido);
     const results = [];
 
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i]!;
-      const vectorId = `agent-${agenteId}-${Date.now()}-${i}`;
+      const vectorId = `doc-${agenteId ?? 'domain'}-${Date.now()}-${i}`;
       let vectorGenerated = false;
 
       // 1. Generate embeddings and store in Vectorize if available
@@ -77,7 +83,8 @@ export class RagService {
                 id: vectorId,
                 values: vector,
                 metadata: {
-                  agente_id: String(agenteId),
+                  agente_id: agenteId ? String(agenteId) : '',
+                  dominio,
                   titulo: section.titulo,
                   archivo: nombreArchivo
                 }
@@ -92,7 +99,9 @@ export class RagService {
 
       // 2. Persist in D1 (triggers automatic FTS5 sync)
       const inserted = await this.docRepo.insertChunk({
-        agenteId,
+        agenteId: agenteId ?? null,
+        dominio,
+        habilidadId: habilidadId ?? null,
         vectorId: vectorGenerated ? vectorId : `local-${Date.now()}-${i}`,
         nombreArchivo,
         tituloSeccion: section.titulo,
@@ -110,11 +119,42 @@ export class RagService {
   }
 
   /**
-   * Hybrid retrieval: Vectorize semantic search + D1 FTS5 lexical search
+   * Hybrid retrieval: Vectorize semantic search + D1 FTS5 lexical search across Domain and Skills
    */
   async retrieveContext(agenteId: number, pregunta: string): Promise<RetrievedChunk[]> {
     const chunks: RetrievedChunk[] = [];
     const seenTitles = new Set<string>();
+
+    // 0. Resolver dominios autorizados según las habilidades del agente
+    const dominios = ['transversal'];
+    try {
+      const agent = await this.agentRepo.findById(agenteId);
+      if (agent) {
+        const codigos = agent.habilidadesList.map((h) => h.codigo.toUpperCase());
+        const isGeneral =
+          agent.slug.toLowerCase().includes('general') ||
+          agent.rol.toLowerCase().includes('general') ||
+          codigos.includes('GENERAL');
+
+        if (isGeneral) {
+          dominios.push('*');
+        } else {
+          if (
+            codigos.some((c) =>
+              ['CONSTITUCIONAL', 'DERECHOS_FUNDAMENTALES', 'TUTELA', 'MECANISMOS_PARTICIPACION', 'ESTRUCTURA_ESTADO'].includes(c)
+            )
+          ) {
+            dominios.push('constitucional');
+          }
+          if (codigos.includes('ADMINISTRATIVO')) dominios.push('administrativo');
+          if (codigos.includes('PENAL')) dominios.push('penal');
+          if (codigos.includes('LABORAL')) dominios.push('laboral');
+          if (codigos.includes('CIVIL')) dominios.push('civil');
+        }
+      }
+    } catch (err) {
+      console.warn('[RAG] Error resolving agent domain skills:', err);
+    }
 
     // 1. Semantic search with Vectorize
     if (this.ai && this.vectorIndex) {
@@ -132,8 +172,13 @@ export class RagService {
           if (vectorMatches?.matches) {
             for (const match of vectorMatches.matches) {
               const meta = match.metadata as any;
-              // Filter by agent if metadata has it
-              if (meta && (!meta.agente_id || meta.agente_id === String(agenteId))) {
+              const matchesAgent = !meta?.agente_id || meta?.agente_id === String(agenteId);
+              const matchesDomain =
+                dominios.includes('*') ||
+                meta?.dominio === 'transversal' ||
+                (meta?.dominio && dominios.includes(meta.dominio));
+
+              if (meta && (matchesAgent || matchesDomain)) {
                 const title = meta.titulo || 'Fragmento Constitucional';
                 seenTitles.add(title);
                 chunks.push({
@@ -154,7 +199,7 @@ export class RagService {
 
     // 2. Lexical search with D1 FTS5 (always executes and grounds exact articles)
     try {
-      const ftsMatches = await this.docRepo.searchFts(agenteId, pregunta, 3);
+      const ftsMatches = await this.docRepo.searchFts(agenteId, pregunta, 3, dominios);
       for (const fts of ftsMatches) {
         if (!seenTitles.has(fts.tituloSeccion)) {
           seenTitles.add(fts.tituloSeccion);
@@ -169,10 +214,10 @@ export class RagService {
       console.warn('[RAG] FTS search fallback:', err);
     }
 
-    // 3. If no chunks found yet, retrieve most recent chunks of this agent as grounding context
+    // 3. If no chunks found yet, retrieve most recent chunks of this agent or authorized domains
     if (chunks.length === 0) {
-      const recent = await this.docRepo.findByAgentId(agenteId);
-      for (const item of recent.slice(0, 2)) {
+      const recent = await this.docRepo.findRelevantChunks(agenteId, dominios, 2);
+      for (const item of recent) {
         chunks.push({
           titulo: item.tituloSeccion,
           contenido: item.contenido,

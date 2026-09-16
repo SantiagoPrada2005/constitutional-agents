@@ -66,7 +66,9 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     const result = await ragService.ingestDocument(
       agentId,
       validation.data.nombreArchivo,
-      validation.data.contenido
+      validation.data.contenido,
+      validation.data.dominio,
+      validation.data.habilidadId
     );
 
     return new Response(

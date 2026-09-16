@@ -34,8 +34,10 @@ export const agenteHabilidades = sqliteTable('agente_habilidades', {
 export const agenteDocumentos = sqliteTable('agente_documentos', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   agenteId: integer('agente_id')
-    .notNull()
     .references(() => agentes.id, { onDelete: 'cascade' }),
+  dominio: text('dominio', { length: 50 }).notNull().default('transversal'),
+  habilidadId: integer('habilidad_id')
+    .references(() => habilidades.id, { onDelete: 'cascade' }),
   vectorId: text('vector_id', { length: 64 }),
   nombreArchivo: text('nombre_archivo', { length: 150 }).notNull(),
   tituloSeccion: text('titulo_seccion', { length: 200 }).notNull(),
@@ -50,6 +52,7 @@ export const agentesRelations = relations(agentes, ({ many }) => ({
 
 export const habilidadesRelations = relations(habilidades, ({ many }) => ({
   agentes: many(agenteHabilidades),
+  documentos: many(agenteDocumentos),
 }));
 
 export const agenteHabilidadesRelations = relations(agenteHabilidades, ({ one }) => ({
@@ -67,5 +70,9 @@ export const agenteDocumentosRelations = relations(agenteDocumentos, ({ one }) =
   agente: one(agentes, {
     fields: [agenteDocumentos.agenteId],
     references: [agentes.id],
+  }),
+  habilidad: one(habilidades, {
+    fields: [agenteDocumentos.habilidadId],
+    references: [habilidades.id],
   }),
 }));

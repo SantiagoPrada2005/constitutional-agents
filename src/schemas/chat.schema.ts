@@ -7,7 +7,9 @@ export const ChatQuerySchema = z.object({
 
 export const IngestDocumentSchema = z.object({
   nombreArchivo: z.string().min(1, 'El nombre del archivo es obligatorio'),
-  contenido: z.string().min(10, 'El contenido del documento debe tener al menos 10 caracteres')
+  contenido: z.string().min(10, 'El contenido del documento debe tener al menos 10 caracteres'),
+  dominio: z.string().optional().default('transversal'),
+  habilidadId: z.number().optional()
 });
 
 export type ChatQueryDTO = z.infer<typeof ChatQuerySchema>;
