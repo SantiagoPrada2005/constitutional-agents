@@ -1,0 +1,358 @@
+---
+// AgentTable.astro - High-density management table for agents
+---
+
+<div id="agent-table-root" class="flex flex-col gap-4">
+  <!-- Controls Bar: Search + Filter + Actions -->
+  <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#111827] p-3 rounded-lg border border-[#1e293b]">
+    <div class="relative flex-1 max-w-md">
+      <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#a58c7d]">search</span>
+      <input
+        type="text"
+        id="search-agent-input"
+        placeholder="Filtrar por nombre, rol o slug..."
+        class="w-full pl-9 pr-3 py-1.5 bg-[#0b0f17] border border-[#1e293b] rounded text-sm text-on-surface placeholder-[#64748b] focus:outline-none focus:border-[#f38020] font-mono transition-colors"
+      />
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        id="refresh-agents-btn"
+        class="flex items-center gap-1.5 px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] text-on-surface border border-[#334155] rounded text-xs transition-colors font-mono"
+        title="Actualizar tabla"
+      >
+        <span class="material-symbols-outlined text-[16px]">refresh</span>
+        <span>Recargar</span>
+      </button>
+
+      <a
+        href="/nuevo"
+        class="flex items-center gap-1.5 px-3 py-1.5 bg-[#f38020] hover:bg-[#fb923c] text-[#0b0f17] font-medium rounded text-xs transition-colors font-mono shadow-[0_0_10px_rgba(243,128,32,0.3)]"
+      >
+        <span class="material-symbols-outlined text-[16px]">add</span>
+        <span>Nuevo Agente</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Table Container -->
+  <div class="bg-[#111827] border border-[#1e293b] rounded-lg overflow-hidden shadow-sm">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-[#181c24] border-b border-[#1e293b] font-mono text-[11px] text-[#a58c7d] uppercase tracking-wider">
+            <th class="py-3 px-4">Agente / Slug</th>
+            <th class="py-3 px-4">Rol Constitucional</th>
+            <th class="py-3 px-4">Modelo & Temp</th>
+            <th class="py-3 px-4">Habilidades</th>
+            <th class="py-3 px-4">Base .md</th>
+            <th class="py-3 px-4 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="agents-tbody" class="divide-y divide-[#1e293b] text-sm">
+          <!-- Populated by client script -->
+          <tr>
+            <td colspan="6" class="py-8 text-center text-[#a58c7d] font-mono text-xs">
+              <div class="inline-flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#f38020] animate-ping"></span>
+                <span>Cargando catálogo de agentes desde Cloudflare D1...</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal for Ingesting Knowledge .md -->
+  <div id="ingest-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#111827] border border-[#334155] rounded-xl max-w-xl w-full p-6 shadow-2xl flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-[#1e293b] pb-3">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[#06b6d4]">upload_file</span>
+          <h3 class="font-semibold text-on-surface text-base" id="modal-agent-title">Ingestar Conocimiento (.md)</h3>
+        </div>
+        <button id="close-modal-btn" class="text-[#a58c7d] hover:text-white transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <div>
+          <label class="block font-mono text-xs text-[#a58c7d] mb-1">Plantillas Constitucionales Disponibles</label>
+          <select id="quick-doc-select" class="w-full bg-[#0b0f17] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface">
+            <option value="">-- Seleccionar archivo de la Constitución --</option>
+            <option value="titulo_1_principios.md">Título I: Principios Fundamentales (Arts. 1 al 5)</option>
+            <option value="titulo_2_derechos.md">Título II: Derechos y Garantías (Arts. 11, 12, 13, 23, 29, 86)</option>
+            <option value="titulo_4_participacion.md">Título IV: Participación Ciudadana (Arts. 103, 104, 105)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-mono text-xs text-[#a58c7d] mb-1">Nombre del Archivo</label>
+          <input
+            type="text"
+            id="doc-filename-input"
+            placeholder="ej. titulo_2_derechos.md"
+            class="w-full bg-[#0b0f17] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface focus:outline-none focus:border-[#06b6d4]"
+          />
+        </div>
+
+        <div>
+          <label class="block font-mono text-xs text-[#a58c7d] mb-1">Contenido Markdown a Ingestar</label>
+          <textarea
+            id="doc-content-input"
+            rows="6"
+            placeholder="Pegar artículos o secciones en formato Markdown (## Artículo ...)..."
+            class="w-full bg-[#0b0f17] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface focus:outline-none focus:border-[#06b6d4]"
+          ></textarea>
+        </div>
+
+        <div id="ingest-feedback" class="hidden p-2.5 rounded font-mono text-xs"></div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#1e293b]">
+        <button id="cancel-ingest-btn" class="px-3 py-1.5 rounded border border-[#334155] text-xs text-on-surface hover:bg-[#1e293b] transition-colors">
+          Cancelar
+        </button>
+        <button id="submit-ingest-btn" class="px-4 py-1.5 rounded bg-[#06b6d4] text-[#0b0f17] font-semibold text-xs hover:bg-[#22d3ee] transition-colors flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">dataset</span>
+          <span>Indexar Chunks</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { apiClient } from '../services/client/apiClient';
+
+  let agentsList: any[] = [];
+  let selectedAgentId: number | null = null;
+
+  const tbody = document.getElementById('agents-tbody');
+  const searchInput = document.getElementById('search-agent-input') as HTMLInputElement;
+  const refreshBtn = document.getElementById('refresh-agents-btn');
+  const ingestModal = document.getElementById('ingest-modal');
+  const closeModalBtn = document.getElementById('close-modal-btn');
+  const cancelIngestBtn = document.getElementById('cancel-ingest-btn');
+  const submitIngestBtn = document.getElementById('submit-ingest-btn') as HTMLButtonElement;
+  const modalTitle = document.getElementById('modal-agent-title');
+  const docFilenameInput = document.getElementById('doc-filename-input') as HTMLInputElement;
+  const docContentInput = document.getElementById('doc-content-input') as HTMLTextAreaElement;
+  const quickDocSelect = document.getElementById('quick-doc-select') as HTMLSelectElement;
+  const ingestFeedback = document.getElementById('ingest-feedback');
+
+  const constitutionTemplates: Record<string, string> = {
+    'titulo_1_principios.md': `# Título I: De los Principios Fundamentales\n\n## Artículo 1: Estado Social de Derecho\nColombia es un Estado social de derecho, organizado en forma de República unitaria, descentralizada, con autonomía de sus entidades territoriales, democrática, participativa y pluralista, fundada en el respeto de la dignidad humana, en el trabajo y la solidaridad de las personas que la integran y en la prevalencia del interés general.\n\n## Artículo 2: Fines Esenciales del Estado\nSon fines esenciales del Estado: servir a la comunidad, promover la prosperidad general y garantizar la efectividad de los principios, derechos y deberes consagrados en la Constitución.\n\n## Artículo 4: Supremacía Constitucional\nLa Constitución es norma de normas. En todo caso de incompatibilidad entre la Constitución y la ley u otra norma jurídica, se aplicarán las disposiciones constitucionales.`,
+    'titulo_2_derechos.md': `# Título II: De los Derechos, las Garantías y los Deberes\n\n## Artículo 11: Derecho a la Vida\nEl derecho a la vida es inviolable. No habrá pena de muerte.\n\n## Artículo 12: Integridad Personal\nNadie será sometido a desaparición forzada, a torturas ni a tratos o penas crueles, inhumanos o degradantes.\n\n## Artículo 23: Derecho de Petición\nToda persona tiene derecho a presentar peticiones respetuosas a las autoridades por motivos de interés general o particular y a obtener pronta resolución.\n\n## Artículo 86: Acción de Tutela\nToda persona tendrá acción de tutela para reclamar ante los jueces, en todo momento y lugar, mediante un procedimiento preferente y sumario, la protección inmediata de sus derechos constitucionales fundamentales.`,
+    'titulo_4_participacion.md': `# Título IV: De la Participación Democrática\n\n## Artículo 103: Mecanismos de Participación Ciudadana\nSon mecanismos de participación del pueblo en ejercicio de su soberanía: el voto, el plebiscito, el referendo, la consulta popular, el cabildo abierto, la iniciativa popular y la revocatoria del mandato.\n\n## Artículo 104: Consulta Popular Nacional\nEl Presidente de la República, con la firma de todos los ministros y previo concepto favorable del Senado, podrá consultar al pueblo decisiones de trascendencia nacional.`
+  };
+
+  async function loadAgents() {
+    if (!tbody) return;
+    try {
+      tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-[#a58c7d] font-mono text-xs">Cargando agentes desde Cloudflare D1...</td></tr>`;
+      agentsList = await apiClient.getAgentes();
+      renderAgents(agentsList);
+    } catch (err: any) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="py-6 text-center text-error font-mono text-xs">
+            Error al consultar agentes: ${err.message}
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+  function renderAgents(list: any[]) {
+    if (!tbody) return;
+    if (list.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" class="py-12 text-center text-[#a58c7d]">
+            <div class="flex flex-col items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-4xl text-[#334155]">smart_toy</span>
+              <p class="font-medium text-on-surface">No hay agentes registrados en la base de datos</p>
+              <a href="/nuevo" class="mt-2 text-xs font-mono text-[#f38020] hover:underline">
+                + Crear el primer agente constitucional
+              </a>
+            </div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = list
+      .map((a) => {
+        const skillsArray = a.habilidades ? a.habilidades.split(',').filter(Boolean) : [];
+        const skillsChips = skillsArray
+          .map(
+            (s: string) =>
+              `<span class="px-1.5 py-0.5 rounded bg-[#181c24] border border-[#334155] text-[10px] font-mono text-[#4cd7f6]">${s}</span>`
+          )
+          .join(' ');
+
+        return `
+          <tr class="hover:bg-[#181c24]/50 transition-colors">
+            <td class="py-3 px-4">
+              <div class="flex flex-col">
+                <span class="font-semibold text-on-surface flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full ${a.activo ? 'bg-tertiary' : 'bg-[#64748b]'}"></span>
+                  ${a.nombre}
+                </span>
+                <span class="font-mono text-xs text-primary">${a.slug}</span>
+              </div>
+            </td>
+            <td class="py-3 px-4">
+              <span class="text-xs text-on-surface-variant">${a.rol}</span>
+            </td>
+            <td class="py-3 px-4">
+              <div class="flex flex-col gap-0.5">
+                <span class="font-mono text-[11px] text-secondary">${a.modelo || 'Llama 3.1 8B'}</span>
+                <span class="font-mono text-[10px] text-[#a58c7d]">Temp: ${a.temperatura ?? 0.2}</span>
+              </div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="flex flex-wrap gap-1 max-w-xs">
+                ${skillsChips || '<span class="text-xs text-[#64748b] font-mono">Sin habilidades</span>'}
+              </div>
+            </td>
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-1.5 font-mono text-xs">
+                <span class="material-symbols-outlined text-[16px] text-tertiary">article</span>
+                <span class="text-on-surface">${a.documentosCount ?? 0}</span>
+                <button
+                  class="ml-1 text-[11px] text-[#06b6d4] hover:underline open-ingest-btn"
+                  data-agent-id="${a.id}"
+                  data-agent-name="${a.nombre}"
+                  title="Subir conocimiento .md"
+                >
+                  + Ingestar
+                </button>
+              </div>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <div class="inline-flex items-center gap-1.5">
+                <a
+                  href="/chat/${a.id}"
+                  class="p-1.5 rounded bg-[#1e293b] hover:bg-[#334155] text-primary transition-colors inline-flex items-center"
+                  title="Consultar RAG"
+                >
+                  <span class="material-symbols-outlined text-[18px]">chat</span>
+                </a>
+                <button
+                  class="p-1.5 rounded bg-[#1e293b] hover:bg-[#93000a] text-error transition-colors delete-agent-btn inline-flex items-center"
+                  data-agent-id="${a.id}"
+                  data-agent-name="${a.nombre}"
+                  title="Eliminar agente"
+                >
+                  <span class="material-symbols-outlined text-[18px]">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    // Attach row events
+    document.querySelectorAll('.delete-agent-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const id = Number(target.dataset.agentId);
+        const name = target.dataset.agentName;
+        if (confirm(`¿Estás seguro de eliminar el agente "${name}" y todos sus documentos vinculados?`)) {
+          try {
+            await apiClient.deleteAgente(id);
+            await loadAgents();
+          } catch (err: any) {
+            alert(`Error al eliminar: ${err.message}`);
+          }
+        }
+      });
+    });
+
+    document.querySelectorAll('.open-ingest-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        selectedAgentId = Number(target.dataset.agentId);
+        const name = target.dataset.agentName;
+        if (modalTitle) modalTitle.textContent = `Ingestar en: ${name}`;
+        if (ingestModal) ingestModal.classList.remove('hidden');
+        if (ingestFeedback) ingestFeedback.classList.add('hidden');
+      });
+    });
+  }
+
+  // Filter input handler
+  searchInput?.addEventListener('input', () => {
+    const q = searchInput.value.toLowerCase().trim();
+    if (!q) {
+      renderAgents(agentsList);
+      return;
+    }
+    const filtered = agentsList.filter(
+      (a) =>
+        a.nombre.toLowerCase().includes(q) ||
+        a.slug.toLowerCase().includes(q) ||
+        a.rol.toLowerCase().includes(q)
+    );
+    renderAgents(filtered);
+  });
+
+  refreshBtn?.addEventListener('click', loadAgents);
+
+  // Modal interactions
+  closeModalBtn?.addEventListener('click', () => ingestModal?.classList.add('hidden'));
+  cancelIngestBtn?.addEventListener('click', () => ingestModal?.classList.add('hidden'));
+
+  quickDocSelect?.addEventListener('change', () => {
+    const selected = quickDocSelect.value;
+    if (selected && constitutionTemplates[selected]) {
+      docFilenameInput.value = selected;
+      docContentInput.value = constitutionTemplates[selected] || '';
+    }
+  });
+
+  submitIngestBtn?.addEventListener('click', async () => {
+    if (!selectedAgentId) return;
+    const filename = docFilenameInput.value.trim();
+    const content = docContentInput.value.trim();
+
+    if (!filename || !content) {
+      alert('Por favor especifica un nombre de archivo y el contenido Markdown.');
+      return;
+    }
+
+    submitIngestBtn.disabled = true;
+    submitIngestBtn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Indexando...`;
+
+    try {
+      const res = await apiClient.ingestarConocimiento(selectedAgentId, filename, content);
+      if (ingestFeedback) {
+        ingestFeedback.className = 'p-2.5 rounded font-mono text-xs bg-[#10b981]/20 border border-[#10b981] text-tertiary';
+        ingestFeedback.textContent = `¡Éxito! Se indexaron ${res.chunksIngested} secciones en D1 y Vectorize.`;
+        ingestFeedback.classList.remove('hidden');
+      }
+      setTimeout(() => {
+        ingestModal?.classList.add('hidden');
+        loadAgents();
+      }, 1200);
+    } catch (err: any) {
+      if (ingestFeedback) {
+        ingestFeedback.className = 'p-2.5 rounded font-mono text-xs bg-[#ef4444]/20 border border-[#ef4444] text-error';
+        ingestFeedback.textContent = `Error: ${err.message}`;
+        ingestFeedback.classList.remove('hidden');
+      }
+    } finally {
+      submitIngestBtn.disabled = false;
+      submitIngestBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">dataset</span><span>Indexar Chunks</span>`;
+    }
+  });
+
+  // Initial load
+  loadAgents();
+</script>

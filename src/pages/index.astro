@@ -1,0 +1,109 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AgentTable from '../components/AgentTable.astro';
+---
+
+<Layout title="Dashboard de Orquestación | Constitutional AI Agents" activePath="/">
+  <div class="flex flex-col gap-6">
+    <!-- Breadcrumb & Architecture Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#1e293b] pb-4">
+      <div>
+        <div class="flex items-center gap-2 font-mono text-xs text-[#a58c7d] mb-1">
+          <span class="text-primary flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">cloud</span>
+            Cloudflare Serverless Edge
+          </span>
+          <span>/</span>
+          <span>Astro Server Islands</span>
+          <span>/</span>
+          <span class="text-tertiary">D1 + Vectorize + Workers AI</span>
+        </div>
+        <h1 class="text-2xl font-bold text-on-surface tracking-tight">
+          Gestión y Orquestación de Agentes Constitucionales
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-2 font-mono text-xs">
+        <div class="flex items-center gap-1.5 px-3 py-1 rounded bg-[#111827] border border-[#1e293b]">
+          <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+          <span class="text-[#a58c7d]">CLUSTER:</span>
+          <span class="text-on-surface font-semibold">BOG-01</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Telemetry Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Card 1: D1 Database -->
+      <div class="p-4 rounded-xl bg-[#111827] border border-[#1e293b] flex flex-col justify-between">
+        <div class="flex items-start justify-between">
+          <div class="flex flex-col">
+            <span class="font-mono text-[10px] text-[#a58c7d] uppercase tracking-wider">Persistencia D1</span>
+            <span class="text-xl font-bold text-on-surface mt-1 font-mono">SQLite + FTS5</span>
+          </div>
+          <div class="p-2 rounded bg-[#1e293b] text-primary">
+            <span class="material-symbols-outlined text-[20px]">database</span>
+          </div>
+        </div>
+        <div class="mt-3 flex items-center justify-between font-mono text-xs border-t border-[#1e293b] pt-2 text-[#a58c7d]">
+          <span>Triggers FTS5</span>
+          <span class="text-tertiary">Sincronizados</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Workers AI Model -->
+      <div class="p-4 rounded-xl bg-[#111827] border border-[#1e293b] flex flex-col justify-between">
+        <div class="flex items-start justify-between">
+          <div class="flex flex-col">
+            <span class="font-mono text-[10px] text-[#a58c7d] uppercase tracking-wider">Inferencia Edge</span>
+            <span class="text-xl font-bold text-secondary mt-1 font-mono">Llama 3.1 8B</span>
+          </div>
+          <div class="p-2 rounded bg-[#1e293b] text-secondary">
+            <span class="material-symbols-outlined text-[20px]">neurology</span>
+          </div>
+        </div>
+        <div class="mt-3 flex items-center justify-between font-mono text-xs border-t border-[#1e293b] pt-2 text-[#a58c7d]">
+          <span>Latencia Media</span>
+          <span class="text-secondary">~16.4ms</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Vectorize -->
+      <div class="p-4 rounded-xl bg-[#111827] border border-[#1e293b] flex flex-col justify-between">
+        <div class="flex items-start justify-between">
+          <div class="flex flex-col">
+            <span class="font-mono text-[10px] text-[#a58c7d] uppercase tracking-wider">Base Vectorial</span>
+            <span class="text-xl font-bold text-tertiary mt-1 font-mono">Vectorize</span>
+          </div>
+          <div class="p-2 rounded bg-[#1e293b] text-tertiary">
+            <span class="material-symbols-outlined text-[20px]">grain</span>
+          </div>
+        </div>
+        <div class="mt-3 flex items-center justify-between font-mono text-xs border-t border-[#1e293b] pt-2 text-[#a58c7d]">
+          <span>Dimensiones</span>
+          <span class="text-tertiary">1024-D BGE-M3</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Base Documental -->
+      <div class="p-4 rounded-xl bg-[#111827] border border-[#1e293b] flex flex-col justify-between">
+        <div class="flex items-start justify-between">
+          <div class="flex flex-col">
+            <span class="font-mono text-[10px] text-[#a58c7d] uppercase tracking-wider">Base Normativa</span>
+            <span class="text-xl font-bold text-on-surface mt-1 font-mono">Constitución 91</span>
+          </div>
+          <div class="p-2 rounded bg-[#1e293b] text-[#f38020]">
+            <span class="material-symbols-outlined text-[20px]">menu_book</span>
+          </div>
+        </div>
+        <div class="mt-3 flex items-center justify-between font-mono text-xs border-t border-[#1e293b] pt-2 text-[#a58c7d]">
+          <span>Formato</span>
+          <span class="text-primary">Markdown (.md)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Management Table Component -->
+    <AgentTable />
+  </div>
+</Layout>

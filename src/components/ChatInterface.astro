@@ -1,0 +1,246 @@
+---
+interface Props {
+  agentId: number;
+}
+
+const { agentId } = Astro.props;
+---
+
+<div id="chat-root" data-agent-id={agentId} class="flex flex-col h-[calc(100vh-8.5rem)] gap-4">
+  <!-- Agent Summary Card Header -->
+  <div class="bg-[#111827] border border-[#1e293b] rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-[#1e293b] border border-[#334155] flex items-center justify-center text-primary font-mono font-bold text-sm">
+        AI
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h2 id="agent-header-name" class="font-semibold text-on-surface text-base">Cargando agente...</h2>
+          <span id="agent-active-badge" class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-tertiary/10 text-tertiary font-semibold">ONLINE</span>
+        </div>
+        <p id="agent-header-role" class="text-xs text-[#a58c7d] font-mono">Consultando D1...</p>
+      </div>
+    </div>
+
+    <!-- Telemetry Pills -->
+    <div class="flex items-center gap-2 font-mono text-xs">
+      <div class="px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5">
+        <span class="text-[#a58c7d]">MODEL:</span>
+        <span id="agent-header-model" class="text-secondary font-medium">@cf/meta/llama-4-scout-17b-16e-instruct</span>
+      </div>
+      <div class="px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5">
+        <span class="text-[#a58c7d]">TEMP:</span>
+        <span id="agent-header-temp" class="text-tertiary">0.2</span>
+      </div>
+      <div class="px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5">
+        <span class="text-[#a58c7d]">CHUNKS:</span>
+        <span id="agent-header-docs" class="text-primary">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat & Citations Main Split Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
+    <!-- Messages Terminal (Left 2 cols) -->
+    <div class="lg:col-span-2 bg-[#0b0f17] border border-[#1e293b] rounded-xl flex flex-col overflow-hidden">
+      <!-- Chat Messages Scrollable Log -->
+      <div id="chat-messages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 font-mono text-xs">
+        <div class="p-3 rounded-lg bg-[#111827] border border-[#1e293b] text-[#cbd5e1] leading-relaxed">
+          <div class="flex items-center gap-2 text-primary mb-1">
+            <span class="material-symbols-outlined text-[16px]">terminal</span>
+            <span class="font-bold">Constitutional Agent Console Ready</span>
+          </div>
+          Escribe una pregunta sobre la Constitución Política de Colombia. El motor orquestará la recuperación híbrida (Vectorize semántico + D1 FTS5 léxico) y fundamentará la respuesta en los artículos indexados.
+        </div>
+      </div>
+
+      <!-- Quick Question Suggestions -->
+      <div class="px-3 py-2 border-t border-[#1e293b] bg-[#111827]/50 flex items-center gap-2 overflow-x-auto whitespace-nowrap font-mono text-[11px]">
+        <span class="text-[#a58c7d]">Sugerencias:</span>
+        <button class="quick-prompt-btn px-2 py-1 rounded bg-[#181c24] hover:bg-[#1e293b] text-secondary border border-[#334155] transition-colors" data-prompt="¿Qué dice el Artículo 11 sobre el derecho a la vida?">
+          Art. 11 (Derecho a la vida)
+        </button>
+        <button class="quick-prompt-btn px-2 py-1 rounded bg-[#181c24] hover:bg-[#1e293b] text-secondary border border-[#334155] transition-colors" data-prompt="¿Cómo funciona la Acción de Tutela según el Artículo 86?">
+          Art. 86 (Acción de Tutela)
+        </button>
+        <button class="quick-prompt-btn px-2 py-1 rounded bg-[#181c24] hover:bg-[#1e293b] text-secondary border border-[#334155] transition-colors" data-prompt="¿Cuáles son los fines esenciales del Estado en el Artículo 2?">
+          Art. 2 (Fines del Estado)
+        </button>
+      </div>
+
+      <!-- Input Bar -->
+      <form id="chat-form" class="p-3 bg-[#111827] border-t border-[#1e293b] flex items-center gap-2">
+        <input
+          type="text"
+          id="chat-input"
+          placeholder="Consultar artículo, derecho fundamental o principio..."
+          required
+          class="flex-1 bg-[#0b0f17] border border-[#1e293b] rounded-lg px-3 py-2.5 text-xs font-mono text-on-surface placeholder-[#64748b] focus:outline-none focus:border-primary transition-colors"
+        />
+        <button
+          type="submit"
+          id="chat-send-btn"
+          class="flex items-center gap-1.5 px-4 py-2.5 bg-[#f38020] hover:bg-[#fb923c] text-[#0b0f17] font-semibold text-xs font-mono rounded-lg transition-colors shadow-[0_0_10px_rgba(243,128,32,0.3)] disabled:opacity-50"
+        >
+          <span class="material-symbols-outlined text-[16px]">send</span>
+          <span>Consultar</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Citations & Grounding Context Inspector (Right 1 col) -->
+    <div class="bg-[#111827] border border-[#1e293b] rounded-xl flex flex-col overflow-hidden">
+      <div class="p-3 border-b border-[#1e293b] flex items-center justify-between">
+        <div class="flex items-center gap-2 text-on-surface font-semibold text-xs">
+          <span class="material-symbols-outlined text-[16px] text-tertiary">fact_check</span>
+          <span>Citas y Fundamentación RAG</span>
+        </div>
+        <span id="citation-count" class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-[#1e293b] text-[#a58c7d]">0 citas</span>
+      </div>
+
+      <div id="citations-list" class="flex-1 p-3 overflow-y-auto flex flex-col gap-3 font-mono text-xs">
+        <div class="text-center text-[#a58c7d] py-12 px-4">
+          <span class="material-symbols-outlined text-3xl text-[#334155] mb-2">article</span>
+          <p>Los fragmentos normativos recuperados de D1 y Vectorize aparecerán aquí para verificar el sustento constitucional de cada respuesta.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { apiClient } from '../services/client/apiClient';
+
+  const root = document.getElementById('chat-root');
+  const agentId = Number(root?.dataset.agentId);
+
+  const headerName = document.getElementById('agent-header-name');
+  const headerRole = document.getElementById('agent-header-role');
+  const headerModel = document.getElementById('agent-header-model');
+  const headerTemp = document.getElementById('agent-header-temp');
+  const headerDocs = document.getElementById('agent-header-docs');
+
+  const chatMessages = document.getElementById('chat-messages');
+  const chatForm = document.getElementById('chat-form') as HTMLFormElement;
+  const chatInput = document.getElementById('chat-input') as HTMLInputElement;
+  const sendBtn = document.getElementById('chat-send-btn') as HTMLButtonElement;
+  const citationsList = document.getElementById('citations-list');
+  const citationCount = document.getElementById('citation-count');
+
+  async function loadAgentDetails() {
+    try {
+      const agent = await apiClient.getAgente(agentId);
+      if (headerName) headerName.textContent = agent.nombre;
+      if (headerRole) headerRole.textContent = `${agent.rol} | slug: ${agent.slug}`;
+      if (headerModel) headerModel.textContent = agent.modelo;
+      if (headerTemp) headerTemp.textContent = String(agent.temperatura ?? 0.2);
+      if (headerDocs) headerDocs.textContent = String(agent.documentosCount ?? 0);
+    } catch (err: any) {
+      if (headerName) headerName.textContent = `Error: ${err.message}`;
+    }
+  }
+
+  function appendUserMessage(text: string) {
+    if (!chatMessages) return;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'self-end max-w-[85%] p-3 rounded-lg bg-[#1e293b] border border-[#334155] text-on-surface';
+    msgDiv.innerHTML = `
+      <div class="flex items-center gap-1.5 text-primary text-[10px] mb-1 font-bold">
+        <span class="material-symbols-outlined text-[14px]">person</span>
+        <span>Ciudadano / Consultante</span>
+      </div>
+      <p class="whitespace-pre-wrap">${text}</p>
+    `;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function appendAgentMessage(text: string, isLiveAI: boolean) {
+    if (!chatMessages) return;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'self-start max-w-[90%] p-3.5 rounded-lg bg-[#111827] border border-[#1e293b] text-[#dfe2ee] leading-relaxed';
+    msgDiv.innerHTML = `
+      <div class="flex items-center justify-between gap-2 text-tertiary text-[10px] mb-1.5 font-bold">
+        <div class="flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">gavel</span>
+          <span>Respuesta Constitucional Grounded</span>
+        </div>
+        <span class="text-[9px] px-1 py-0.2 rounded ${isLiveAI ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'}">
+          ${isLiveAI ? 'Workers AI Llama 3.1' : 'D1 Grounded Fallback'}
+        </span>
+      </div>
+      <div class="whitespace-pre-wrap leading-relaxed">${text}</div>
+    `;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function renderCitations(citations: any[]) {
+    if (!citationsList || !citationCount) return;
+    citationCount.textContent = `${citations.length} citas`;
+
+    if (citations.length === 0) {
+      citationsList.innerHTML = `
+        <div class="text-center text-[#a58c7d] py-6">
+          <p>No se encontraron fragmentos normativos para esta consulta específica.</p>
+        </div>
+      `;
+      return;
+    }
+
+    citationsList.innerHTML = citations
+      .map(
+        (c) => `
+        <div class="p-2.5 rounded-lg bg-[#0b0f17] border-l-2 border-l-[#06b6d4] border-t border-r border-b border-[#1e293b]">
+          <div class="flex items-center justify-between gap-1 mb-1">
+            <span class="font-semibold text-secondary text-xs truncate">${c.titulo}</span>
+            <span class="text-[9px] px-1 rounded bg-[#181c24] text-tertiary font-mono">
+              ${c.origen === 'vectorial' ? 'VECTOR' : 'FTS5'}
+            </span>
+          </div>
+          <p class="text-[11px] text-[#cbd5e1] leading-normal line-clamp-4">${c.contenido}</p>
+        </div>
+      `
+      )
+      .join('');
+  }
+
+  chatForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pregunta = chatInput.value.trim();
+    if (!pregunta) return;
+
+    chatInput.value = '';
+    appendUserMessage(pregunta);
+
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Pensando...</span>`;
+
+    try {
+      const data = await apiClient.consultarRag(agentId, pregunta);
+      appendAgentMessage(data.respuesta, data.isLiveAI);
+      if (data.citas) {
+        renderCitations(data.citas);
+      }
+    } catch (err: any) {
+      appendAgentMessage(`Error al consultar: ${err.message}`, false);
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">send</span><span>Consultar</span>`;
+    }
+  });
+
+  // Quick suggestion clicks
+  document.querySelectorAll('.quick-prompt-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const target = e.currentTarget as HTMLElement;
+      const prompt = target.dataset.prompt;
+      if (prompt && chatInput) {
+        chatInput.value = prompt;
+        chatForm.dispatchEvent(new Event('submit'));
+      }
+    });
+  });
+
+  loadAgentDetails();
+</script>

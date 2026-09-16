@@ -1,0 +1,16 @@
+---
+import Layout from '../layouts/Layout.astro';
+import AgentForm from '../components/AgentForm.astro';
+---
+
+<Layout title="Registrar Nuevo Agente | Constitutional AI" activePath="/nuevo">
+  <div class="flex flex-col gap-4">
+    <div class="flex items-center gap-2 font-mono text-xs text-[#a58c7d] mb-2">
+      <a href="/" class="hover:text-white transition-colors">Gestión de Agentes</a>
+      <span>/</span>
+      <span class="text-primary">Nuevo Registro</span>
+    </div>
+
+    <AgentForm />
+  </div>
+</Layout>

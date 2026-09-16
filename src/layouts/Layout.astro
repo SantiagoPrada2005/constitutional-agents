@@ -1,0 +1,178 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  activePath?: string;
+}
+
+const { title = 'Constitutional AI Agent Orchestrator', activePath = '/' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <style is:global>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #0f131c;
+        color: #dfe2ee;
+        font-family: 'Geist', sans-serif;
+      }
+      .font-mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+      /* Custom subtle scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0f131c;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #262a33;
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #353942;
+      }
+    </style>
+  </head>
+  <body class="bg-background min-h-screen flex text-on-surface selection:bg-primary-container selection:text-on-primary">
+    <!-- Left Navigation Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-64 bg-[#0a0e16] border-r border-[#1e293b] z-50 flex flex-col justify-between">
+      <div class="flex flex-col">
+        <!-- Brand Header -->
+        <a href="/" class="h-16 px-4 flex items-center gap-3 border-b border-[#1e293b] hover:bg-[#111827] transition-colors">
+          <img src="/logo.svg" alt="Constitutional AI Logo" class="h-8 w-8 object-contain" />
+          <div class="flex flex-col">
+            <span class="text-sm font-semibold text-on-surface tracking-tight">Lex-Edge AI</span>
+            <span class="text-[10px] font-mono text-primary font-medium tracking-wider">CONSTITUTIONAL</span>
+          </div>
+        </a>
+
+        <!-- Edge Status Badge -->
+        <div class="mx-3 my-3 p-2 bg-[#111827] border border-[#1e293b] rounded-lg flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+            <span class="font-mono text-xs text-on-surface">POP: BOG-01</span>
+          </div>
+          <span class="font-mono text-[10px] text-tertiary bg-[#1c2028] px-1.5 py-0.5 rounded">14ms</span>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="px-2 py-2 flex flex-col gap-1">
+          <a
+            href="/"
+            class:list={[
+              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              activePath === '/'
+                ? 'bg-[#f38020] text-[#0b0f17] font-semibold shadow-[0_0_12px_rgba(243,128,32,0.3)]'
+                : 'text-on-surface-variant hover:bg-[#181c24] hover:text-on-surface'
+            ]}
+          >
+            <span class="material-symbols-outlined text-[18px]">hub</span>
+            <span>Gestión y Agentes</span>
+          </a>
+
+          <a
+            href="/nuevo"
+            class:list={[
+              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              activePath === '/nuevo'
+                ? 'bg-[#f38020] text-[#0b0f17] font-semibold shadow-[0_0_12px_rgba(243,128,32,0.3)]'
+                : 'text-on-surface-variant hover:bg-[#181c24] hover:text-on-surface'
+            ]}
+          >
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>Nuevo Agente</span>
+          </a>
+
+          <a
+            href="/chat/1"
+            class:list={[
+              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              activePath.startsWith('/chat')
+                ? 'bg-[#f38020] text-[#0b0f17] font-semibold shadow-[0_0_12px_rgba(243,128,32,0.3)]'
+                : 'text-on-surface-variant hover:bg-[#181c24] hover:text-on-surface'
+            ]}
+          >
+            <span class="material-symbols-outlined text-[18px]">gavel</span>
+            <span>RAG Constitucional</span>
+          </a>
+        </nav>
+      </div>
+
+      <!-- Telemetry Bottom Bar -->
+      <div class="p-4 bg-[#0a0e16] border-t border-[#1e293b] flex flex-col gap-2">
+        <div class="flex items-center justify-between font-mono text-[11px] text-[#a58c7d]">
+          <span>WORKERS AI</span>
+          <span class="text-secondary font-medium">Llama 3.1 8B</span>
+        </div>
+        <div class="flex items-center justify-between font-mono text-[11px] text-[#a58c7d]">
+          <span>VECTORIZE</span>
+          <span class="text-tertiary font-medium">1024-D BGE-M3</span>
+        </div>
+        <div class="flex items-center justify-between font-mono text-[11px] text-[#a58c7d]">
+          <span>D1 SQLITE</span>
+          <span class="text-primary font-medium">FTS5 ACTIVE</span>
+        </div>
+        <div class="w-full bg-[#1e293b] h-1 rounded-full overflow-hidden mt-1">
+          <div class="bg-primary-container h-full w-4/5 animate-pulse"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace Area -->
+    <div class="pl-64 flex-1 flex flex-col min-h-screen">
+      <!-- Top Fixed Header -->
+      <header class="h-16 bg-[#0a0e16]/90 backdrop-blur-md border-b border-[#1e293b] sticky top-0 z-40 flex items-center justify-between px-6">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] px-3 py-1 rounded-lg font-mono text-xs">
+            <span class="text-[#a58c7d]">RUNTIME:</span>
+            <span class="text-[#f38020] font-semibold">Cloudflare Edge</span>
+          </div>
+          <div class="flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] px-3 py-1 rounded-lg font-mono text-xs">
+            <span class="text-[#a58c7d]">API:</span>
+            <span class="text-secondary font-semibold">/api/agentes</span>
+          </div>
+          <div class="hidden md:flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] px-3 py-1 rounded-lg font-mono text-xs">
+            <span class="text-[#a58c7d]">P95 LATENCY:</span>
+            <span class="text-tertiary font-bold">16.2ms</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a
+            href="/nuevo"
+            class="hidden sm:inline-flex items-center gap-1.5 bg-primary-container text-on-primary px-3 py-1.5 rounded text-xs font-medium hover:bg-[#fb923c] transition-colors shadow-[0_0_12px_rgba(243,128,32,0.3)]"
+          >
+            <span class="material-symbols-outlined text-[16px]">add</span>
+            <span>Crear Agente</span>
+          </a>
+
+          <div class="flex items-center gap-2 pl-2 border-l border-[#1e293b]">
+            <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-[#502400] font-bold text-xs">
+              CF
+            </div>
+            <span class="font-mono text-xs text-on-surface hidden lg:inline">edge_admin</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="flex-1 p-6 max-w-7xl w-full mx-auto">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

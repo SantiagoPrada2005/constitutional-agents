@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      "colors": {
+        "tertiary-fixed": "#6ffbbe",
+        "tertiary-fixed-dim": "#4edea3",
+        "on-error-container": "#ffdad6",
+        "secondary-fixed": "#acedff",
+        "on-tertiary-fixed-variant": "#005236",
+        "inverse-primary": "#964900",
+        "on-secondary-fixed": "#001f26",
+        "surface-container-high": "#262a33",
+        "inverse-on-surface": "#2c3039",
+        "error": "#ffb4ab",
+        "primary": "#ffb787",
+        "on-primary-fixed": "#311300",
+        "on-surface": "#dfe2ee",
+        "secondary": "#4cd7f6",
+        "background": "#0f131c",
+        "surface-container-low": "#181c24",
+        "secondary-container": "#03b5d3",
+        "secondary-fixed-dim": "#4cd7f6",
+        "outline-variant": "#564336",
+        "surface-tint": "#ffb787",
+        "inverse-surface": "#dfe2ee",
+        "primary-container": "#f38020",
+        "on-primary-container": "#592900",
+        "on-secondary": "#003640",
+        "surface-container-lowest": "#0a0e16",
+        "on-tertiary": "#003824",
+        "surface-dim": "#0f131c",
+        "surface-container": "#1c2028",
+        "error-container": "#93000a",
+        "on-surface-variant": "#ddc1b1",
+        "on-primary-fixed-variant": "#723600",
+        "on-primary": "#502400",
+        "on-secondary-container": "#00424e",
+        "tertiary-container": "#00b57d",
+        "tertiary": "#4edea3",
+        "surface-variant": "#31353e",
+        "on-secondary-fixed-variant": "#004e5c",
+        "primary-fixed-dim": "#ffb787",
+        "outline": "#a58c7d",
+        "on-tertiary-fixed": "#002113",
+        "on-background": "#dfe2ee",
+        "on-error": "#690005",
+        "surface-container-highest": "#31353e",
+        "primary-fixed": "#ffdcc7",
+        "on-tertiary-container": "#003f29",
+        "surface": "#0f131c",
+        "surface-bright": "#353942"
+      },
+      "borderRadius": {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+      "spacing": {
+        "space-sm": "0.5rem",
+        "gutter": "1rem",
+        "gutter-lg": "1.5rem",
+        "space-xs": "0.25rem",
+        "margin-lg": "2rem",
+        "space-2xl": "2rem",
+        "space-xl": "1.5rem",
+        "space-lg": "1rem",
+        "margin-md": "1.5rem",
+        "margin": "1rem",
+        "space-md": "0.75rem"
+      },
+      "fontFamily": {
+        "display-lg": ["Geist"],
+        "body-lg": ["Geist"],
+        "headline-md": ["Geist"],
+        "label-lg": ["JetBrains Mono"],
+        "label-md": ["JetBrains Mono"],
+        "body-sm": ["Geist"],
+        "code-stream": ["JetBrains Mono"],
+        "display-lg-mobile": ["Geist"],
+        "body-md": ["Geist"],
+        "headline-lg": ["Geist"],
+        "headline-sm": ["Geist"],
+        "label-sm": ["JetBrains Mono"],
+        "headline-lg-mobile": ["Geist"]
+      },
+      "fontSize": {
+        "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600"}],
+        "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}],
+        "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "500"}],
+        "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "500"}],
+        "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "code-stream": ["13px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "display-lg-mobile": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+        "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+        "label-sm": ["10px", {"lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+      }
+    }
+  }
+}</script></head><body class="bg-background font-body-md text-body-md text-on-surface min-h-screen selection:bg-primary-container selection:text-on-primary-container"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.4)]"><div class="flex flex-col"><div class="h-16 px-space-lg flex items-center gap-space-sm bg-surface-container-low/60"><img alt="Brand logo. - Primary color: #f38020
+- Font: geist
+- Mode: dark
+- Roundness: rounded-sm
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1USYF8JqqqYTVLGUfAWG6T5A_aVDiWo1rW6Wy1ocK2LtthVOWEU-1d9Mkwpva5Zxc34gMg8Av82OgYku5noQb0_jl1FxRLzVyOC3zsAwwBU8_ZIhn_I06EB0GfbdBSq62jJ5ZXIUGaQSAyHZ6j0rQK8_eygDCV8_uuzaBI38kNLV9Nzsf6QexU5AUzA5suySoEPK00v6VJDbRQp0NdgWiSz2Frr0bKJHT5LhZYqnDpgBdykDPoQdu2l"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface font-semibold tracking-tight">Lex-Edge AI</span><span class="font-label-sm text-label-sm text-primary">ORCHESTRATOR</span></div></div><div class="mx-space-md my-space-sm p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span><span class="font-label-md text-label-md text-on-surface">POP: BOG-01</span></div><span class="font-label-sm text-label-sm text-tertiary bg-surface-container px-space-xs py-0.5 rounded">12ms</span></div><nav class="px-space-sm py-space-xs flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary-container font-semibold"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="gestion-y-agentes" href="#"><span class="material-symbols-outlined text-[18px]">hub</span><span class="font-body-md text-body-md">Gestión y Agentes</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="nuevo-agente" href="#"><span class="material-symbols-outlined text-[18px]">add_circle</span><span class="font-body-md text-body-md">Nuevo Agente</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="rag-and-chat-constitucional" href="#"><span class="material-symbols-outlined text-[18px]">gavel</span><span class="font-body-md text-body-md">RAG &amp; Chat Constitucional</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="bindings-y-telemetria" href="#"><span class="material-symbols-outlined text-[18px]">database</span><span class="font-body-md text-body-md">Bindings &amp; Telemetría</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="documentacion-y-swagger" href="#"><span class="material-symbols-outlined text-[18px]">terminal</span><span class="font-body-md text-body-md">Documentación &amp; Swagger</span></a></nav></div><div class="p-space-md bg-surface-container-low/40 flex flex-col gap-space-sm"><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant"><span>WORKERS AI</span><span class="text-secondary">ONLINE</span></div><div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant"><span>VECTORIZE D1</span><span class="text-tertiary">SYNCED</span></div><div class="w-full bg-surface-container-high h-1 rounded-full overflow-hidden"><div class="bg-primary-container h-full w-2/3"></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.3)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1 rounded-lg"><span class="font-label-sm text-label-sm text-on-surface-variant">EDGE:</span><select class="bg-transparent font-label-sm text-label-sm text-on-surface focus:outline-none cursor-pointer"><option class="bg-surface-container" value="bog-01">BOG-01 Production</option><option class="bg-surface-container" value="scl-02">SCL-02 Fallback</option></select></div><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1 rounded-lg"><span class="font-label-sm text-label-sm text-primary">/api/agentes</span><span class="font-label-sm text-label-sm bg-surface-container-high px-1 rounded text-on-surface">v2.4</span></div><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1 rounded-lg"><span class="font-label-sm text-label-sm text-on-surface-variant">p95:</span><span class="font-label-sm text-label-sm text-tertiary font-bold">18.4ms</span></div></div><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container-low px-space-sm py-1 rounded-lg"><span class="font-label-sm text-label-sm text-error">Test 6: Offline 503</span><label class="relative inline-flex items-center cursor-pointer"><input class="sr-only peer" type="checkbox" value=""/><div class="w-8 h-4 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-surface peer-checked:bg-error-container after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface after:border-surface after:border after:rounded-full after:h-3 after:w-3 after:transition-all"></div></label></div><button class="relative p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg transition-colors" title="SSE Feed"><span class="material-symbols-outlined text-[20px]">sensors</span><span class="absolute top-1 right-1 w-2 h-2 bg-tertiary rounded-full"></span></button><button class="relative p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-lg transition-colors" title="Notificaciones"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 bg-primary-container rounded-full"></span></button><div class="flex items-center gap-space-xs pl-space-xs"><div class="flex flex-col text-right hidden lg:flex"><span class="font-label-sm text-label-sm text-on-surface font-semibold">edge_admin</span><span class="font-label-sm text-label-sm text-primary">Serverless Ops</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-screen px-gutter"><div class="flex flex-col w-full text-on-surface">
+<!-- TOP BREADCRUMB & METRIC STATUS BAR -->
+<div class="flex flex-col gap-space-sm mb-space-lg">
+<div class="flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]">device_hub</span>
+          Edge Cluster
+        </span>
+<span>/</span>
+<span class="text-on-surface">BOG-01 (Bogotá Metro)</span>
+<span>/</span>
+<span class="text-tertiary">Agentes D1 Active Replica</span>
+</div>
+<div class="flex items-center gap-space-sm font-label-sm text-label-sm">
+<div class="flex items-center gap-1.5 px-space-sm py-0.5 rounded-lg bg-surface-container-high text-on-surface">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+<span>CF WORKERS RUNTIME:</span>
+<span class="text-primary font-bold">compat_v2024-10</span>
+</div>
+<div class="flex items-center gap-1 px-space-sm py-0.5 rounded-lg bg-surface-container text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px] text-secondary">memory</span>
+<span>V8 Heap: 12.4 MB</span>
+</div>
+</div>
+</div>
+<!-- RESILIENCY TEST 6 BANNER -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm p-space-md rounded-xl bg-surface-container-low shadow-sm">
+<div class="flex items-center gap-space-md">
+<div class="p-space-xs rounded bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">shield</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Prueba 6: Simulación Backend Offline</span>
+<span class="px-space-xs py-0.5 rounded bg-tertiary/10 text-tertiary font-label-sm text-label-sm font-semibold">CIRCUIT BREAKER ARMED</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Valida la degradación elegante y entrega de fallback desde D1 Cache Layer cuando el clúster regional de inferencia simula HTTP 503.</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md self-end md:self-center">
+<div class="px-space-sm py-1 rounded-lg bg-surface-container font-label-sm text-label-sm text-tertiary flex items-center gap-1.5" id="sim-status-badge">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span>HTTP 200 OK | CF D1 + Vectorize Online</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" id="toggle-sim-503" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-on-surface after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-error"></div>
+</label>
+</div>
+</div>
+</div>
+<!-- KPI CARDS GRID -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-xl">
+<!-- KPI 1: Cloudflare D1 -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Cloudflare D1 (env.DB)</span>
+<span class="font-display-lg text-display-lg text-on-surface mt-1">4</span>
+</div>
+<div class="p-space-xs rounded-lg bg-surface-container-high text-primary">
+<span class="material-symbols-outlined text-[20px]">database</span>
+</div>
+</div>
+<div class="mt-space-md flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">Agentes Registrados</span>
+<span class="text-tertiary">SQLite + FTS5</span>
+</div>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>Zero-cold-start edge replica</span>
+</div>
+</div>
+</div>
+<!-- KPI 2: Vectorize Index -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Vectorize (env.VECTOR_INDEX)</span>
+<span class="font-display-lg text-display-lg text-secondary mt-1">142</span>
+</div>
+<div class="p-space-xs rounded-lg bg-surface-container-high text-secondary">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+</div>
+</div>
+<div class="mt-space-md flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">Chunks Normativos</span>
+<span class="text-secondary">1024d BGE-M3</span>
+</div>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Cosine Sim Threshold: &gt;0.78</span>
+</div>
+</div>
+</div>
+<!-- KPI 3: Workers AI -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Workers AI (env.AI)</span>
+<span class="font-display-lg text-display-lg text-primary mt-1">18<span class="text-headline-md font-label-lg">ms</span></span>
+</div>
+<div class="p-space-xs rounded-lg bg-surface-container-high text-primary">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+</div>
+<div class="mt-space-md flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">p95 Latency</span>
+<span class="text-tertiary">84 tok/s</span>
+</div>
+<div class="truncate font-label-sm text-label-sm text-on-surface-variant" title="@cf/meta/llama-3.1-8b-instruct">
+          @cf/meta/llama-3.1-8b-instruct
+        </div>
+</div>
+</div>
+<!-- KPI 4: Edge Ingestion Cache -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Edge Ingestion Cache</span>
+<span class="font-display-lg text-display-lg text-tertiary mt-1">94.2<span class="text-headline-md font-label-lg">%</span></span>
+</div>
+<div class="p-space-xs rounded-lg bg-surface-container-high text-tertiary">
+<span class="material-symbols-outlined text-[20px]">electric_meter</span>
+</div>
+</div>
+<div class="mt-space-md flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">BOG-01 Cache HIT</span>
+<span class="text-primary font-bold">12ms Edge hop</span>
+</div>
+<div class="flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>Stale-While-Revalidate KV TTL: 300s</span>
+</div>
+</div>
+</div>
+</div>
+<!-- MAIN WORKSPACE SPLIT -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start pb-space-2xl">
+<!-- LEFT / CENTER: AGENTS CATALOG & ORCHESTRATION TABLE (approx 65% on XL) -->
+<div class="xl:col-span-8 flex flex-col gap-space-md">
+<!-- ACTION TOOLBAR -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col md:flex-row md:items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm flex-1">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[18px]">search</span>
+<input class="w-full bg-surface-container-lowest text-on-surface pl-10 pr-4 py-1.5 rounded-lg font-code-stream text-code-stream placeholder-on-surface-variant/50 focus:outline-none focus:ring-1 focus:ring-primary-container" id="agent-search-input" placeholder="Filtrar por slug, rol o habilidad..." type="text"/>
+</div>
+<select class="bg-surface-container text-on-surface font-label-sm text-label-sm px-space-sm py-2 rounded-lg cursor-pointer focus:outline-none">
+<option>Todos los modelos</option>
+<option>Llama 3.1 8B Instruct</option>
+<option>BGE-M3 (Embeddings)</option>
+</select>
+<select class="bg-surface-container text-on-surface font-label-sm text-label-sm px-space-sm py-2 rounded-lg cursor-pointer focus:outline-none">
+<option>Activos (4)</option>
+<option>Inactivos (0)</option>
+</select>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="px-space-sm py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-colors" id="btn-refresh-d1">
+<span class="material-symbols-outlined text-[16px]">sync</span>
+<span>Refrescar D1</span>
+</button>
+<a class="px-space-md py-1.5 rounded-lg bg-primary-container hover:bg-primary text-on-primary-container font-label-sm text-label-sm font-semibold flex items-center gap-1 transition-colors shadow-sm" data-path="nuevo-agente" href="#">
+<span class="material-symbols-outlined text-[16px]">add_circle</span>
+<span>+ Registrar Agente</span>
+</a>
+</div>
+</div>
+<!-- AGENTS CARDS / HIGH-DENSITY LIST -->
+<div class="flex flex-col gap-space-sm" id="agents-catalog">
+<!-- CARD 1: Guardián de Tutelas -->
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col gap-space-sm transition-all hover:bg-surface-container">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">gavel</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Guardián de Tutelas</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-primary">slug: tutela-experto</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span> Active
+                  </span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Especialista en Derechos Fundamentales (Art. 86) y Jurisprudencia de la Corte Constitucional</span>
+</div>
+</div>
+<!-- Action Badges / CTAs -->
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold hover:bg-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">chat</span>
+<span>Iniciar Chat RAG</span>
+</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-secondary hover:text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="previewAgentApi('tutela-experto')">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span>REST API</span>
+</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">upload_file</span>
+<span>.MD</span>
+</button>
+<button class="p-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" title="Ajustes D1">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+</button>
+</div>
+</div>
+<!-- Metadata Pill Bar -->
+<div class="pt-space-xs flex flex-wrap items-center justify-between gap-space-xs font-label-sm text-label-sm">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">Habilidades:</span>
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-mono">TUTELA_DEFENSE</span>
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-mono">DERECHOS_FUNDAMENTALES</span>
+</div>
+<div class="flex items-center gap-space-md text-on-surface-variant">
+<span>Model: <code class="text-on-surface">@cf/.../llama-3.1-8b</code></span>
+<span>Temp: <code class="text-secondary">0.20</code></span>
+<span class="text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">layers</span> 48 chunks vinculados
+              </span>
+</div>
+</div>
+</div>
+<!-- CARD 2: Jurisconsulto Dogmático -->
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col gap-space-sm transition-all hover:bg-surface-container">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[24px]">account_balance</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Jurisconsulto Dogmático</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-secondary">slug: dogmatica-constitucional</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Active
+                  </span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Analista de Principios Fundamentales y Soberanía Popular (Título I y II de la Carta Magna)</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold hover:bg-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">chat</span>
+<span>Iniciar Chat RAG</span>
+</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-secondary hover:text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="previewAgentApi('dogmatica-constitucional')">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span>REST API</span>
+</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">upload_file</span>
+<span>.MD</span>
+</button>
+<button class="p-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" title="Ajustes D1">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+</button>
+</div>
+</div>
+<div class="pt-space-xs flex flex-wrap items-center justify-between gap-space-xs font-label-sm text-label-sm">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">Habilidades:</span>
+<span class="px-2 py-0.5 rounded bg-secondary/10 text-secondary font-mono">PRINCIPIOS_CONSTITUCIONALES</span>
+<span class="px-2 py-0.5 rounded bg-secondary/10 text-secondary font-mono">DERECHO_COMPARADO</span>
+</div>
+<div class="flex items-center gap-space-md text-on-surface-variant">
+<span>Model: <code class="text-on-surface">@cf/.../llama-3.1-8b</code></span>
+<span>Temp: <code class="text-secondary">0.15</code></span>
+<span class="text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">layers</span> 56 chunks vinculados
+              </span>
+</div>
+</div>
+</div>
+<!-- CARD 3: Veedor de Participación -->
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col gap-space-sm transition-all hover:bg-surface-container">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[24px]">how_to_vote</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Veedor de Participación</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-tertiary">slug: mecanismos-participacion</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Active
+                  </span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Consultor en Plebiscito, Referendo, Consulta Popular y Cabildo Abierto (Título IV)</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold hover:bg-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">chat</span>
+<span>Iniciar Chat RAG</span>
+</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-secondary hover:text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="previewAgentApi('mecanismos-participacion')">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span>REST API</span>
+</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">upload_file</span>
+<span>.MD</span>
+</button>
+<button class="p-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" title="Ajustes D1">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+</button>
+</div>
+</div>
+<div class="pt-space-xs flex flex-wrap items-center justify-between gap-space-xs font-label-sm text-label-sm">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">Habilidades:</span>
+<span class="px-2 py-0.5 rounded bg-tertiary/10 text-tertiary font-mono">MECANISMOS_DEMOCRATICOS</span>
+</div>
+<div class="flex items-center gap-space-md text-on-surface-variant">
+<span>Model: <code class="text-on-surface">@cf/.../llama-3.1-8b</code></span>
+<span>Temp: <code class="text-secondary">0.30</code></span>
+<span class="text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">layers</span> 38 chunks vinculados
+              </span>
+</div>
+</div>
+</div>
+<!-- CARD 4: Auditor de Debido Proceso -->
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col gap-space-sm transition-all hover:bg-surface-container">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">verified_user</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Auditor de Debido Proceso</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-surface-container text-primary">slug: habeas-corpus-bot</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Active
+                  </span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Garantías Judiciales, Habeas Corpus y Control de Constitucionalidad (Art. 29 y 30)</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold hover:bg-primary flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">chat</span>
+<span>Iniciar Chat RAG</span>
+</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-secondary hover:text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-colors" onclick="previewAgentApi('habeas-corpus-bot')">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+<span>REST API</span>
+</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">upload_file</span>
+<span>.MD</span>
+</button>
+<button class="p-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors" title="Ajustes D1">
+<span class="material-symbols-outlined text-[16px]">settings</span>
+</button>
+</div>
+</div>
+<div class="pt-space-xs flex flex-wrap items-center justify-between gap-space-xs font-label-sm text-label-sm">
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">Habilidades:</span>
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-mono">DEBIDO_PROCESO</span>
+<span class="px-2 py-0.5 rounded bg-primary/10 text-primary font-mono">CONTROL_CONSTITUCIONALIDAD</span>
+</div>
+<div class="flex items-center gap-space-md text-on-surface-variant">
+<span>Model: <code class="text-on-surface">@cf/.../llama-3.1-8b</code></span>
+<span>Temp: <code class="text-secondary">0.20</code></span>
+<span class="text-tertiary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">layers</span> 24 chunks vinculados
+              </span>
+</div>
+</div>
+</div>
+</div>
+<!-- VISUAL RAG INFERENCE PIPELINE DIAGRAM -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Flujo de Inferencia Edge Serverless (Constitución RAG)</span>
+<span class="font-label-sm text-label-sm text-tertiary">Zero Server Bottleneck</span>
+</div>
+<div class="relative py-2 flex items-center justify-between overflow-x-auto gap-2">
+<!-- Step 1 -->
+<div class="flex-1 min-w-[120px] p-2 rounded-lg bg-surface-container flex flex-col gap-1 items-center text-center">
+<span class="material-symbols-outlined text-secondary text-[20px]">psychology</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">1. User Query</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant">Edge Request Event</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">arrow_forward</span>
+<!-- Step 2 -->
+<div class="flex-1 min-w-[120px] p-2 rounded-lg bg-surface-container flex flex-col gap-1 items-center text-center">
+<span class="material-symbols-outlined text-tertiary text-[20px]">filter_center_focus</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">2. Vectorize</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant">Cosine Match Top-4</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">arrow_forward</span>
+<!-- Step 3 -->
+<div class="flex-1 min-w-[120px] p-2 rounded-lg bg-surface-container flex flex-col gap-1 items-center text-center">
+<span class="material-symbols-outlined text-primary text-[20px]">database</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">3. D1 Metadatos</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant">Artículos &amp; Parágrafos</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]">arrow_forward</span>
+<!-- Step 4 -->
+<div class="flex-1 min-w-[120px] p-2 rounded-lg bg-primary-container/20 flex flex-col gap-1 items-center text-center">
+<span class="material-symbols-outlined text-primary text-[20px]">smart_toy</span>
+<span class="font-label-sm text-label-sm font-semibold text-primary">4. Workers AI</span>
+<span class="font-body-sm text-[10px] text-on-surface">Llama 3.1 8B Stream</span>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT: REST API INSPECTOR & REAL-TIME SANDBOX (approx 35% on XL) -->
+<div class="xl:col-span-4 flex flex-col gap-space-md">
+<!-- SANDBOX TERMINAL CARD -->
+<div class="rounded-xl bg-surface-container-low overflow-hidden shadow-sm flex flex-col">
+<!-- Terminal Header -->
+<div class="bg-surface-container-high px-space-md py-space-sm flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-error"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+<span class="ml-2 font-label-sm text-label-sm text-on-surface font-semibold">REST API Live Inspector</span>
+</div>
+<span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">Astro.locals</span>
+</div>
+<!-- Request Sandbox Execution Bar -->
+<div class="p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest p-1 rounded-lg">
+<span class="px-2 py-1 rounded bg-secondary/10 text-secondary font-label-sm text-label-sm font-bold">GET</span>
+<input class="bg-transparent font-code-stream text-code-stream text-on-surface flex-1 focus:outline-none" id="api-endpoint-url" readonly="" type="text" value="/api/agentes"/>
+<button class="px-space-sm py-1 rounded bg-primary-container hover:bg-primary text-on-primary-container font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1" id="btn-execute-query">
+<span class="material-symbols-outlined text-[14px]">play_arrow</span>
+<span>Ejecutar</span>
+</button>
+</div>
+<!-- Quick Selector Tabs for API Simulation -->
+<div class="flex items-center gap-space-xs">
+<button class="flex-1 py-1 text-center font-label-sm text-label-sm rounded bg-surface-container text-tertiary font-semibold" id="tab-live-200">
+              Live Payload (200)
+            </button>
+<button class="flex-1 py-1 text-center font-label-sm text-label-sm rounded bg-surface-container-lowest text-on-surface-variant hover:text-on-surface" id="tab-sim-503">
+              Offline Fallback (503)
+            </button>
+</div>
+<!-- Telemetry Response Indicators -->
+<div class="flex items-center justify-between font-label-sm text-label-sm px-1 text-on-surface-variant">
+<span class="flex items-center gap-1">
+              Status: <span class="text-tertiary font-bold" id="telemetry-status">200 OK</span>
+</span>
+<span class="flex items-center gap-1">
+              Latency: <span class="text-secondary font-mono" id="telemetry-latency">18.4ms</span>
+</span>
+<span class="flex items-center gap-1">
+              Binding: <span class="text-primary font-mono">env.DB</span>
+</span>
+</div>
+<!-- Code View Terminal -->
+<div class="relative bg-surface-container-lowest p-space-md rounded-lg overflow-x-auto max-h-[360px]">
+<button class="absolute top-2 right-2 p-1 rounded bg-surface-container text-on-surface-variant hover:text-on-surface text-[12px] flex items-center gap-1" id="btn-copy-json" title="Copiar JSON">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+<pre class="font-code-stream text-code-stream leading-relaxed text-on-surface" id="json-terminal-output"><code>{
+  <span class="text-primary">"status"</span>: <span class="text-tertiary">"ok"</span>,
+  <span class="text-primary">"pop"</span>: <span class="text-secondary">"BOG-01"</span>,
+  <span class="text-primary">"bindings"</span>: {
+    <span class="text-primary">"d1"</span>: <span class="text-tertiary">"env.DB_ONLINE"</span>,
+    <span class="text-primary">"vectorize"</span>: <span class="text-tertiary">"env.VECTOR_SYNC"</span>
+  },
+  <span class="text-primary">"total_agentes"</span>: <span class="text-secondary">4</span>,
+  <span class="text-primary">"data"</span>: [
+    {
+      <span class="text-primary">"id"</span>: <span class="text-tertiary">"ag_01"</span>,
+      <span class="text-primary">"slug"</span>: <span class="text-tertiary">"tutela-experto"</span>,
+      <span class="text-primary">"nombre"</span>: <span class="text-on-surface">"Guardián de Tutelas"</span>,
+      <span class="text-primary">"chunks_count"</span>: <span class="text-secondary">48</span>,
+      <span class="text-primary">"model"</span>: <span class="text-secondary">"@cf/meta/llama-3.1-8b"</span>
+    },
+    {
+      <span class="text-primary">"id"</span>: <span class="text-tertiary">"ag_02"</span>,
+      <span class="text-primary">"slug"</span>: <span class="text-tertiary">"dogmatica-constitucional"</span>,
+      <span class="text-primary">"nombre"</span>: <span class="text-on-surface">"Jurisconsulto Dogmático"</span>,
+      <span class="text-primary">"chunks_count"</span>: <span class="text-secondary">56</span>,
+      <span class="text-primary">"model"</span>: <span class="text-secondary">"@cf/meta/llama-3.1-8b"</span>
+    }
+  ]
+}</code></pre>
+</div>
+</div>
+</div>
+<!-- DOCUMENT INGESTION QUICK WIDGET -->
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">upload_file</span>
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">Ingesta RAG Constitución</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary">.MD / Markdown</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Arrastra capítulos de la Constitución de Colombia para vectorización automática en Cloudflare Vectorize (1024d) e indexación SQL en D1.
+        </p>
+<!-- Drag & Drop Zone -->
+<div class="p-space-lg rounded-lg bg-surface-container-lowest flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface-container-high transition-colors group">
+<span class="material-symbols-outlined text-[32px] text-on-surface-variant group-hover:text-primary transition-colors">cloud_upload</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface mt-2">Arrastra archivo constitutucion_titulo_iv.md</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant mt-0.5">Chunking semántico automático (512 tokens + 10% overlap)</span>
+</div>
+<!-- Ingestion Queue Progress -->
+<div class="flex flex-col gap-1.5 p-space-sm rounded bg-surface-container-lowest">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface truncate">constitucion_colombia_1991.md</span>
+<span class="text-tertiary">142/142 Chunks Upserted</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+<div class="bg-tertiary h-full w-full"></div>
+</div>
+</div>
+<!-- Quick link to full chat -->
+<a class="w-full py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm flex items-center justify-center gap-2 transition-colors" data-path="rag-and-chat-constitucional" href="#">
+<span class="material-symbols-outlined text-[16px] text-primary">forum</span>
+<span>Abrir Consola de Diálogo Constitucional</span>
+</a>
+</div>
+</div>
+</div>
+<!-- TOAST ALERT CONTAINER FOR TEST 6 INTERACTION -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none p-space-md rounded-xl bg-error-container text-on-error-container shadow-xl flex items-start gap-space-sm max-w-md" id="sim-toast">
+<span class="material-symbols-outlined text-[24px] text-error">warning</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider">Simulación Backend 503 Activada</span>
+<span class="font-body-sm text-body-sm mt-0.5">Workers Ingestion layer devolviendo error 503 forzado. El dashboard conmuta a D1 Read Cache local sin interrumpir la navegación.</span>
+</div>
+</div>
+</div>
+<script>
+  // Dynamic interaction handles for the sandbox & simulation banner
+  const simToggle = document.getElementById('toggle-sim-503');
+  const simBadge = document.getElementById('sim-status-badge');
+  const toast = document.getElementById('sim-toast');
+  const telemetryStatus = document.getElementById('telemetry-status');
+  const telemetryLatency = document.getElementById('telemetry-latency');
+  const terminalOutput = document.getElementById('json-terminal-output');
+  const tabLive = document.getElementById('tab-live-200');
+  const tabSim = document.getElementById('tab-sim-503');
+  const searchInput = document.getElementById('agent-search-input');
+  const agentsCatalog = document.getElementById('agents-catalog');
+  const btnExecute = document.getElementById('btn-execute-query');
+  const btnCopy = document.getElementById('btn-copy-json');
+
+  const jsonSuccess = `{
+  "status": "ok",
+  "pop": "BOG-01",
+  "bindings": {
+    "d1": "env.DB_ONLINE",
+    "vectorize": "env.VECTOR_SYNC"
+  },
+  "total_agentes": 4,
+  "data": [
+    {
+      "id": "ag_01",
+      "slug": "tutela-experto",
+      "nombre": "Guardián de Tutelas",
+      "chunks_count": 48,
+      "model": "@cf/meta/llama-3.1-8b"
+    },
+    {
+      "id": "ag_02",
+      "slug": "dogmatica-constitucional",
+      "nombre": "Jurisconsulto Dogmático",
+      "chunks_count": 56,
+      "model": "@cf/meta/llama-3.1-8b"
+    },
+    {
+      "id": "ag_03",
+      "slug": "mecanismos-participacion",
+      "nombre": "Veedor de Participación",
+      "chunks_count": 38,
+      "model": "@cf/meta/llama-3.1-8b"
+    },
+    {
+      "id": "ag_04",
+      "slug": "habeas-corpus-bot",
+      "nombre": "Auditor de Debido Proceso",
+      "chunks_count": 24,
+      "model": "@cf/meta/llama-3.1-8b"
+    }
+  ]
+}`;
+
+  const jsonError503 = `{
+  "error": "BACKEND_SERVICE_UNAVAILABLE",
+  "code": 503,
+  "circuit_breaker": "TRIGGERED",
+  "edge_pop": "BOG-01",
+  "cache_fallback": {
+    "stale_data": true,
+    "source": "CF_D1_EDGE_MIRROR",
+    "cached_agents": 4,
+    "message": "Inferencia temporalmente degradada. Respuestas servidas desde réplica D1 SQLite."
+  }
+}`;
+
+  function applySimulation(is503) {
+    if (is503) {
+      simBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-error animate-ping"></span><span>HTTP 503 SERVICE UNAVAILABLE (Simulado)</span>';
+      simBadge.className = 'px-space-sm py-1 rounded-lg bg-error-container font-label-sm text-label-sm text-error flex items-center gap-1.5';
+      telemetryStatus.textContent = '503 ERR';
+      telemetryStatus.className = 'text-error font-bold';
+      telemetryLatency.textContent = '4.2ms (Degraded Cache)';
+      terminalOutput.innerHTML = `<code>${escapeHtml(jsonError503)}</code>`;
+      tabSim.classList.add('bg-surface-container', 'text-error', 'font-semibold');
+      tabSim.classList.remove('bg-surface-container-lowest', 'text-on-surface-variant');
+      tabLive.classList.remove('bg-surface-container', 'text-tertiary', 'font-semibold');
+      tabLive.classList.add('bg-surface-container-lowest', 'text-on-surface-variant');
+      
+      // Show Toast
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 4500);
+    } else {
+      simBadge.innerHTML = '<span class="w-2 h-2 rounded-full bg-tertiary"></span><span>HTTP 200 OK | CF D1 + Vectorize Online</span>';
+      simBadge.className = 'px-space-sm py-1 rounded-lg bg-surface-container font-label-sm text-label-sm text-tertiary flex items-center gap-1.5';
+      telemetryStatus.textContent = '200 OK';
+      telemetryStatus.className = 'text-tertiary font-bold';
+      telemetryLatency.textContent = '18.4ms';
+      terminalOutput.innerHTML = `<code>${escapeHtml(jsonSuccess)}</code>`;
+      tabLive.classList.add('bg-surface-container', 'text-tertiary', 'font-semibold');
+      tabLive.classList.remove('bg-surface-container-lowest', 'text-on-surface-variant');
+      tabSim.classList.remove('bg-surface-container', 'text-error', 'font-semibold');
+      tabSim.classList.add('bg-surface-container-lowest', 'text-on-surface-variant');
+    }
+  }
+
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  simToggle.addEventListener('change', (e) => {
+    applySimulation(e.target.checked);
+  });
+
+  tabLive.addEventListener('click', () => {
+    simToggle.checked = false;
+    applySimulation(false);
+  });
+
+  tabSim.addEventListener('click', () => {
+    simToggle.checked = true;
+    applySimulation(true);
+  });
+
+  btnExecute.addEventListener('click', () => {
+    telemetryLatency.textContent = (Math.random() * 8 + 12).toFixed(1) + 'ms';
+    btnExecute.classList.add('opacity-75');
+    setTimeout(() => btnExecute.classList.remove('opacity-75'), 200);
+  });
+
+  btnCopy.addEventListener('click', () => {
+    navigator.clipboard.writeText(simToggle.checked ? jsonError503 : jsonSuccess);
+    btnCopy.innerHTML = '<span class="material-symbols-outlined text-[14px] text-tertiary">done</span>';
+    setTimeout(() => {
+      btnCopy.innerHTML = '<span class="material-symbols-outlined text-[14px]">content_copy</span>';
+    }, 1500);
+  });
+
+  // Client filter search
+  searchInput.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase();
+    const cards = agentsCatalog.querySelectorAll('.p-space-md.rounded-xl');
+    cards.forEach(card => {
+      const txt = card.innerText.toLowerCase();
+      card.style.display = txt.includes(q) ? 'flex' : 'none';
+    });
+  });
+
+  window.previewAgentApi = function(slug) {
+    const endpointField = document.getElementById('api-endpoint-url');
+    endpointField.value = `/api/agentes/${slug}`;
+    tabLive.click();
+  };
+</script></main></div></body></html>

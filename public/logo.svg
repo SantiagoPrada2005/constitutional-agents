@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" fill="none">
+  <rect width="96" height="96" rx="20" fill="#0b0f17"/>
+  <rect x="2" y="2" width="92" height="92" rx="18" stroke="#f38020" stroke-width="2" stroke-opacity="0.4"/>
+  <!-- Cloudflare edge nodes & constitutional scales motif -->
+  <path d="M28 66C24.6863 66 22 63.3137 22 60C22 56.9897 24.2184 54.4984 27.1264 54.0626C27.0434 53.4074 27 52.7389 27 52.0625C27 43.1912 34.1634 36 43 36C50.2974 36 56.4446 40.8992 58.3541 47.6047C60.1009 46.5913 62.1384 46 64.3125 46C70.7673 46 76 51.2327 76 57.6875C76 58.0772 75.9809 58.4623 75.9436 58.8415C76.595 59.4891 77 60.3951 77 61.375C77 63.377 75.377 65 73.375 65H28Z" fill="#1e293b" stroke="#f38020" stroke-width="2.5"/>
+  <circle cx="48" cy="36" r="4" fill="#06b6d4"/>
+  <circle cx="32" cy="54" r="3.5" fill="#f38020"/>
+  <circle cx="64" cy="50" r="3.5" fill="#10b981"/>
+  <!-- Scales balance or AI pulse -->
+  <path d="M48 42V60M38 60H58M40 50H56" stroke="#f38020" stroke-width="2" stroke-linecap="round"/>
+</svg>
