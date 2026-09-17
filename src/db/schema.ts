@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, primaryKey } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, primaryKey, index } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
 
 export const agentes = sqliteTable('agentes', {
@@ -31,28 +31,44 @@ export const agenteHabilidades = sqliteTable('agente_habilidades', {
   primaryKey({ columns: [table.agenteId, table.habilidadId] })
 ]);
 
-export const agenteDocumentos = sqliteTable('agente_documentos', {
+export const documentos = sqliteTable('documentos', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   agenteId: integer('agente_id')
     .references(() => agentes.id, { onDelete: 'cascade' }),
   dominio: text('dominio', { length: 50 }).notNull().default('transversal'),
   habilidadId: integer('habilidad_id')
-    .references(() => habilidades.id, { onDelete: 'cascade' }),
-  vectorId: text('vector_id', { length: 64 }),
+    .references(() => habilidades.id, { onDelete: 'set null' }),
   nombreArchivo: text('nombre_archivo', { length: 150 }).notNull(),
+  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+}, (table) => [
+  index('idx_documentos_agente_id').on(table.agenteId),
+  index('idx_documentos_dominio').on(table.dominio),
+  index('idx_documentos_habilidad_id').on(table.habilidadId),
+]);
+
+export const documentoChunks = sqliteTable('documento_chunks', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  documentoId: integer('documento_id')
+    .notNull()
+    .references(() => documentos.id, { onDelete: 'cascade' }),
+  indice: integer('indice').notNull().default(0),
   tituloSeccion: text('titulo_seccion', { length: 200 }).notNull(),
   contenido: text('contenido').notNull(),
+  vectorId: text('vector_id', { length: 64 }).unique(),
   createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-});
+}, (table) => [
+  index('idx_chunks_documento_id').on(table.documentoId),
+  index('idx_chunks_vector_id').on(table.vectorId),
+]);
 
 export const agentesRelations = relations(agentes, ({ many }) => ({
   habilidades: many(agenteHabilidades),
-  documentos: many(agenteDocumentos),
+  documentos: many(documentos),
 }));
 
 export const habilidadesRelations = relations(habilidades, ({ many }) => ({
   agentes: many(agenteHabilidades),
-  documentos: many(agenteDocumentos),
+  documentos: many(documentos),
 }));
 
 export const agenteHabilidadesRelations = relations(agenteHabilidades, ({ one }) => ({
@@ -66,13 +82,21 @@ export const agenteHabilidadesRelations = relations(agenteHabilidades, ({ one })
   }),
 }));
 
-export const agenteDocumentosRelations = relations(agenteDocumentos, ({ one }) => ({
+export const documentosRelations = relations(documentos, ({ one, many }) => ({
   agente: one(agentes, {
-    fields: [agenteDocumentos.agenteId],
+    fields: [documentos.agenteId],
     references: [agentes.id],
   }),
   habilidad: one(habilidades, {
-    fields: [agenteDocumentos.habilidadId],
+    fields: [documentos.habilidadId],
     references: [habilidades.id],
+  }),
+  chunks: many(documentoChunks),
+}));
+
+export const documentoChunksRelations = relations(documentoChunks, ({ one }) => ({
+  documento: one(documentos, {
+    fields: [documentoChunks.documentoId],
+    references: [documentos.id],
   }),
 }));

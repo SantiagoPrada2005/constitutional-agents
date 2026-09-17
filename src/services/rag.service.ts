@@ -56,15 +56,23 @@ export class RagService {
     dominio = 'transversal',
     habilidadId?: number | null
   ) {
+    // 1. Crear documento raíz en D1
+    const document = await this.docRepo.createDocument({
+      agenteId: agenteId ?? null,
+      dominio,
+      habilidadId: habilidadId ?? null,
+      nombreArchivo
+    });
+
     const sections = this.splitMarkdownIntoSections(contenido);
-    const results = [];
+    const chunksToInsert = [];
 
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i]!;
       const vectorId = `doc-${agenteId ?? 'domain'}-${Date.now()}-${i}`;
       let vectorGenerated = false;
 
-      // 1. Generate embeddings and store in Vectorize if available
+      // 2. Generate embeddings and store in Vectorize if available
       if (this.ai && this.vectorIndex) {
         try {
           const aiResponse = await this.ai.run('@cf/baai/bge-m3', {
@@ -96,24 +104,23 @@ export class RagService {
         }
       }
 
-      // 2. Persist in D1 (triggers automatic FTS5 sync)
-      const inserted = await this.docRepo.insertChunk({
-        agenteId: agenteId ?? null,
-        dominio,
-        habilidadId: habilidadId ?? null,
+      chunksToInsert.push({
+        documentoId: document.id,
+        indice: i,
         vectorId: vectorGenerated ? vectorId : `local-${Date.now()}-${i}`,
-        nombreArchivo,
         tituloSeccion: section.titulo,
         contenido: section.contenido
       });
-
-      results.push(inserted);
     }
+
+    // 3. Persist all chunks in D1 (triggers automatic FTS5 sync)
+    const insertedChunks = await this.docRepo.insertManyChunks(chunksToInsert);
 
     return {
       success: true,
-      chunksIngested: results.length,
-      sections: results.map((r) => r?.tituloSeccion)
+      documentId: document.id,
+      chunksIngested: insertedChunks.length,
+      sections: insertedChunks.map((r) => r.tituloSeccion)
     };
   }
 

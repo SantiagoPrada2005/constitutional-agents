@@ -57,7 +57,7 @@ export class AgentRepository {
           }
         },
         documentos: {
-          orderBy: [desc(schema.agenteDocumentos.createdAt)]
+          orderBy: [desc(schema.documentos.createdAt)]
         }
       }
     });

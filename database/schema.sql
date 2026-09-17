@@ -31,42 +31,61 @@ CREATE TABLE IF NOT EXISTS agente_habilidades (
     FOREIGN KEY (habilidad_id) REFERENCES habilidades(id) ON DELETE CASCADE
 );
 
--- 4. Documentos y Chunks de Conocimiento (.md) vinculados por Dominio / Habilidad o Agente
-CREATE TABLE IF NOT EXISTS agente_documentos (
+-- 4. Documentos de Conocimiento (Entidad Raíz / Archivos)
+CREATE TABLE IF NOT EXISTS documentos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     agente_id INTEGER,
     dominio VARCHAR(50) NOT NULL DEFAULT 'transversal',
     habilidad_id INTEGER,
-    vector_id VARCHAR(64),
     nombre_archivo VARCHAR(150) NOT NULL,
-    titulo_seccion VARCHAR(200) NOT NULL,
-    contenido TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (agente_id) REFERENCES agentes(id) ON DELETE CASCADE,
-    FOREIGN KEY (habilidad_id) REFERENCES habilidades(id) ON DELETE CASCADE
+    FOREIGN KEY (habilidad_id) REFERENCES habilidades(id) ON DELETE SET NULL
 );
 
--- 5. Tabla virtual para búsqueda léxica rápida (FTS5)
-CREATE VIRTUAL TABLE IF NOT EXISTS fts_documentos USING fts5(
-    documento_id UNINDEXED,
-    agente_id UNINDEXED,
-    dominio UNINDEXED,
+-- Índices B-Tree para documentos
+CREATE INDEX IF NOT EXISTS idx_documentos_agente_id ON documentos(agente_id);
+CREATE INDEX IF NOT EXISTS idx_documentos_dominio ON documentos(dominio);
+CREATE INDEX IF NOT EXISTS idx_documentos_habilidad_id ON documentos(habilidad_id);
+
+-- 5. Fragmentos de Documentos (Chunks para Embeddings y RAG)
+CREATE TABLE IF NOT EXISTS documento_chunks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    documento_id INTEGER NOT NULL,
+    indice INTEGER NOT NULL DEFAULT 0,
+    titulo_seccion VARCHAR(200) NOT NULL,
+    contenido TEXT NOT NULL,
+    vector_id VARCHAR(64) UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (documento_id) REFERENCES documentos(id) ON DELETE CASCADE
+);
+
+-- Índices B-Tree para chunks
+CREATE INDEX IF NOT EXISTS idx_chunks_documento_id ON documento_chunks(documento_id);
+CREATE INDEX IF NOT EXISTS idx_chunks_vector_id ON documento_chunks(vector_id);
+
+-- 6. Tabla virtual para búsqueda léxica rápida (FTS5 con External Content Table)
+CREATE VIRTUAL TABLE IF NOT EXISTS fts_documento_chunks USING fts5(
     titulo_seccion,
-    contenido
+    contenido,
+    content='documento_chunks',
+    content_rowid='id'
 );
 
--- 6. Triggers para sincronización automática entre agente_documentos y fts_documentos
-CREATE TRIGGER IF NOT EXISTS trg_documentos_insert AFTER INSERT ON agente_documentos BEGIN
-    INSERT INTO fts_documentos (documento_id, agente_id, dominio, titulo_seccion, contenido)
-    VALUES (new.id, new.agente_id, new.dominio, new.titulo_seccion, new.contenido);
+-- 7. Triggers para sincronización automática (FTS5 External Content)
+CREATE TRIGGER IF NOT EXISTS trg_chunks_insert AFTER INSERT ON documento_chunks BEGIN
+    INSERT INTO fts_documento_chunks(rowid, titulo_seccion, contenido)
+    VALUES (new.id, new.titulo_seccion, new.contenido);
 END;
 
-CREATE TRIGGER IF NOT EXISTS trg_documentos_delete AFTER DELETE ON agente_documentos BEGIN
-    DELETE FROM fts_documentos WHERE documento_id = old.id;
+CREATE TRIGGER IF NOT EXISTS trg_chunks_delete AFTER DELETE ON documento_chunks BEGIN
+    INSERT INTO fts_documento_chunks(fts_documento_chunks, rowid, titulo_seccion, contenido)
+    VALUES ('delete', old.id, old.titulo_seccion, old.contenido);
 END;
 
-CREATE TRIGGER IF NOT EXISTS trg_documentos_update AFTER UPDATE ON agente_documentos BEGIN
-    UPDATE fts_documentos
-    SET dominio = new.dominio, titulo_seccion = new.titulo_seccion, contenido = new.contenido
-    WHERE documento_id = old.id;
+CREATE TRIGGER IF NOT EXISTS trg_chunks_update AFTER UPDATE ON documento_chunks BEGIN
+    INSERT INTO fts_documento_chunks(fts_documento_chunks, rowid, titulo_seccion, contenido)
+    VALUES ('delete', old.id, old.titulo_seccion, old.contenido);
+    INSERT INTO fts_documento_chunks(rowid, titulo_seccion, contenido)
+    VALUES (new.id, new.titulo_seccion, new.contenido);
 END;
