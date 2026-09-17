@@ -70,6 +70,47 @@ export class DocumentRepository {
       .returning();
   }
 
+  async findById(id: number) {
+    const [doc] = await this.db
+      .select()
+      .from(schema.agenteDocumentos)
+      .where(eq(schema.agenteDocumentos.id, id))
+      .limit(1);
+    return doc ?? null;
+  }
+
+  async updateChunk(
+    id: number,
+    data: {
+      tituloSeccion?: string | undefined;
+      contenido?: string | undefined;
+      dominio?: string | undefined;
+      habilidadId?: number | null | undefined;
+    }
+  ) {
+    const updateValues: Partial<typeof schema.agenteDocumentos.$inferInsert> = {};
+    if (data.tituloSeccion !== undefined) updateValues.tituloSeccion = data.tituloSeccion;
+    if (data.contenido !== undefined) updateValues.contenido = data.contenido;
+    if (data.dominio !== undefined) updateValues.dominio = data.dominio;
+    if (data.habilidadId !== undefined) updateValues.habilidadId = data.habilidadId;
+
+    const [updated] = await this.db
+      .update(schema.agenteDocumentos)
+      .set(updateValues)
+      .where(eq(schema.agenteDocumentos.id, id))
+      .returning();
+
+    return updated ?? null;
+  }
+
+  async deleteChunk(id: number) {
+    const [deleted] = await this.db
+      .delete(schema.agenteDocumentos)
+      .where(eq(schema.agenteDocumentos.id, id))
+      .returning();
+    return deleted ?? null;
+  }
+
   async findByAgentId(agenteId: number) {
     return this.db.query.agenteDocumentos.findMany({
       where: eq(schema.agenteDocumentos.agenteId, agenteId)

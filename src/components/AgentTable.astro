@@ -1,5 +1,5 @@
 ---
-// AgentTable.astro - High-density management table for agents
+// AgentTable.astro - High-density management table for agents & knowledge
 ---
 
 <div id="agent-table-root" class="flex flex-col gap-4">
@@ -50,7 +50,6 @@
           </tr>
         </thead>
         <tbody id="agents-tbody" class="divide-y divide-[#1e293b] text-sm">
-          <!-- Populated by client script -->
           <tr>
             <td colspan="6" class="py-8 text-center text-[#a58c7d] font-mono text-xs">
               <div class="inline-flex items-center gap-2">
@@ -64,20 +63,129 @@
     </div>
   </div>
 
-  <!-- Modal for Ingesting Knowledge .md -->
-  <div id="ingest-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#111827] border border-[#334155] rounded-xl max-w-xl w-full p-6 shadow-2xl flex flex-col gap-4">
-      <div class="flex items-center justify-between border-b border-[#1e293b] pb-3">
+  <!-- Modal for Managing Knowledge (List / Edit / Ingest) -->
+  <div id="ingest-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-[#111827] border border-[#334155] rounded-xl max-w-2xl w-full max-h-[90vh] p-6 shadow-2xl flex flex-col gap-4 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-[#1e293b] pb-3 shrink-0">
         <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-[#06b6d4]">upload_file</span>
-          <h3 class="font-semibold text-on-surface text-base" id="modal-agent-title">Ingestar Conocimiento (.md)</h3>
+          <span class="material-symbols-outlined text-[#06b6d4]">menu_book</span>
+          <div>
+            <h3 class="font-semibold text-on-surface text-base" id="modal-agent-title">Gestión de Base de Conocimiento</h3>
+            <p class="text-[11px] font-mono text-[#a58c7d]" id="modal-agent-subtitle">Visualizar, editar y sincronizar fragmentos en D1 y FTS5</p>
+          </div>
         </div>
         <button id="close-modal-btn" class="text-[#a58c7d] hover:text-white transition-colors">
           <span class="material-symbols-outlined">close</span>
         </button>
       </div>
 
-      <div class="flex flex-col gap-3">
+      <!-- Navigation Tabs -->
+      <div class="flex items-center gap-2 border-b border-[#1e293b] pb-2 shrink-0">
+        <button
+          id="tab-btn-chunks"
+          class="px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-colors bg-[#1e293b] text-[#06b6d4] border border-[#06b6d4]/40 flex items-center gap-1.5"
+        >
+          <span class="material-symbols-outlined text-[16px]">library_books</span>
+          <span>Fragmentos Indexados</span>
+          <span id="chunks-badge" class="px-1.5 py-0.2 rounded-full bg-[#06b6d4]/20 text-[10px] text-[#06b6d4]">0</span>
+        </button>
+        <button
+          id="tab-btn-ingest"
+          class="px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-colors text-[#a58c7d] hover:text-white hover:bg-[#1e293b] flex items-center gap-1.5"
+        >
+          <span class="material-symbols-outlined text-[16px]">upload_file</span>
+          <span>+ Ingestar Nuevo (.md)</span>
+        </button>
+      </div>
+
+      <!-- Tab 1 Panel: Chunks Explorer & Editor -->
+      <div id="panel-chunks" class="flex flex-col gap-3 overflow-y-auto pr-1 flex-1">
+        <!-- Chunks Search & Filter -->
+        <div class="flex items-center gap-2 shrink-0">
+          <div class="relative flex-1">
+            <span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-[#a58c7d]">search</span>
+            <input
+              type="text"
+              id="search-chunk-input"
+              placeholder="Buscar por título o contenido del fragmento..."
+              class="w-full pl-8 pr-2 py-1 bg-[#0b0f17] border border-[#1e293b] rounded text-xs text-on-surface placeholder-[#64748b] focus:outline-none focus:border-[#06b6d4] font-mono"
+            />
+          </div>
+          <button
+            id="reload-chunks-btn"
+            class="p-1.5 rounded bg-[#1e293b] hover:bg-[#334155] text-xs font-mono text-on-surface transition-colors"
+            title="Recargar fragmentos"
+          >
+            <span class="material-symbols-outlined text-[16px]">refresh</span>
+          </button>
+        </div>
+
+        <!-- Inline Chunk Edit Form (Hidden until edit is clicked) -->
+        <div id="inline-chunk-editor" class="hidden p-4 rounded-lg bg-[#0b0f17] border border-[#06b6d4]/50 flex flex-col gap-3 shrink-0">
+          <div class="flex items-center justify-between border-b border-[#1e293b] pb-2">
+            <span class="font-mono text-xs font-semibold text-[#06b6d4] flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px]">edit</span>
+              <span>Editando Sección de Conocimiento #<span id="editing-chunk-id"></span></span>
+            </span>
+            <button id="cancel-edit-chunk-btn" class="text-xs text-[#a58c7d] hover:text-white font-mono">Cancelar</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-mono text-[11px] text-[#a58c7d] mb-1">Título de la Sección</label>
+              <input
+                type="text"
+                id="edit-chunk-title"
+                class="w-full bg-[#111827] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface focus:outline-none focus:border-[#06b6d4]"
+              />
+            </div>
+            <div>
+              <label class="block font-mono text-[11px] text-[#a58c7d] mb-1">Dominio Jurídico</label>
+              <select
+                id="edit-chunk-domain"
+                class="w-full bg-[#111827] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface focus:outline-none focus:border-[#06b6d4]"
+              >
+                <option value="transversal">transversal</option>
+                <option value="constitucional">constitucional</option>
+                <option value="administrativo">administrativo</option>
+                <option value="penal">penal</option>
+                <option value="laboral">laboral</option>
+                <option value="civil">civil</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-mono text-[11px] text-[#a58c7d] mb-1">Contenido de la Sección</label>
+            <textarea
+              id="edit-chunk-content"
+              rows="4"
+              class="w-full bg-[#111827] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface focus:outline-none focus:border-[#06b6d4]"
+            ></textarea>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#1e293b]">
+            <button
+              id="save-chunk-btn"
+              class="px-3 py-1.5 rounded bg-[#06b6d4] hover:bg-[#22d3ee] text-[#0b0f17] font-semibold text-xs font-mono transition-colors flex items-center gap-1"
+            >
+              <span class="material-symbols-outlined text-[16px]">save</span>
+              <span>Guardar Cambios</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Chunks Cards List Container -->
+        <div id="chunks-list-container" class="flex flex-col gap-2">
+          <div class="py-8 text-center text-[#a58c7d] font-mono text-xs">
+            Cargando fragmentos de conocimiento...
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2 Panel: Ingest Form -->
+      <div id="panel-ingest" class="hidden flex-col gap-3 overflow-y-auto pr-1 flex-1">
         <div>
           <label class="block font-mono text-xs text-[#a58c7d] mb-1">Plantillas Constitucionales Disponibles</label>
           <select id="quick-doc-select" class="w-full bg-[#0b0f17] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface">
@@ -97,14 +205,31 @@
           </select>
         </div>
 
-        <div>
-          <label class="block font-mono text-xs text-[#a58c7d] mb-1">Nombre del Archivo</label>
-          <input
-            type="text"
-            id="doc-filename-input"
-            placeholder="ej. titulo_2_derechos.md"
-            class="w-full bg-[#0b0f17] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface focus:outline-none focus:border-[#06b6d4]"
-          />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-mono text-xs text-[#a58c7d] mb-1">Nombre del Archivo</label>
+            <input
+              type="text"
+              id="doc-filename-input"
+              placeholder="ej. titulo_2_derechos.md"
+              class="w-full bg-[#0b0f17] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface focus:outline-none focus:border-[#06b6d4]"
+            />
+          </div>
+
+          <div>
+            <label class="block font-mono text-xs text-[#a58c7d] mb-1">Dominio Asociado</label>
+            <select
+              id="doc-domain-input"
+              class="w-full bg-[#0b0f17] border border-[#1e293b] rounded p-2 text-xs font-mono text-on-surface focus:outline-none focus:border-[#06b6d4]"
+            >
+              <option value="transversal">transversal</option>
+              <option value="constitucional">constitucional</option>
+              <option value="administrativo">administrativo</option>
+              <option value="penal">penal</option>
+              <option value="laboral">laboral</option>
+              <option value="civil">civil</option>
+            </select>
+          </div>
         </div>
 
         <div>
@@ -118,16 +243,16 @@
         </div>
 
         <div id="ingest-feedback" class="hidden p-2.5 rounded font-mono text-xs"></div>
-      </div>
 
-      <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#1e293b]">
-        <button id="cancel-ingest-btn" class="px-3 py-1.5 rounded border border-[#334155] text-xs text-on-surface hover:bg-[#1e293b] transition-colors">
-          Cancelar
-        </button>
-        <button id="submit-ingest-btn" class="px-4 py-1.5 rounded bg-[#06b6d4] text-[#0b0f17] font-semibold text-xs hover:bg-[#22d3ee] transition-colors flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[16px]">dataset</span>
-          <span>Indexar Chunks</span>
-        </button>
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-[#1e293b]">
+          <button id="cancel-ingest-btn" class="px-3 py-1.5 rounded border border-[#334155] text-xs text-on-surface hover:bg-[#1e293b] transition-colors">
+            Cancelar
+          </button>
+          <button id="submit-ingest-btn" class="px-4 py-1.5 rounded bg-[#06b6d4] text-[#0b0f17] font-semibold text-xs hover:bg-[#22d3ee] transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">dataset</span>
+            <span>Indexar Chunks</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -137,6 +262,7 @@
   import { apiClient } from '../services/client/apiClient';
 
   let agentsList: any[] = [];
+  let currentChunks: any[] = [];
   let selectedAgentId: number | null = null;
 
   const tbody = document.getElementById('agents-tbody');
@@ -147,20 +273,65 @@
   const cancelIngestBtn = document.getElementById('cancel-ingest-btn');
   const submitIngestBtn = document.getElementById('submit-ingest-btn') as HTMLButtonElement;
   const modalTitle = document.getElementById('modal-agent-title');
+  const modalSubtitle = document.getElementById('modal-agent-subtitle');
   const docFilenameInput = document.getElementById('doc-filename-input') as HTMLInputElement;
+  const docDomainInput = document.getElementById('doc-domain-input') as HTMLSelectElement;
   const docContentInput = document.getElementById('doc-content-input') as HTMLTextAreaElement;
   const quickDocSelect = document.getElementById('quick-doc-select') as HTMLSelectElement;
   const ingestFeedback = document.getElementById('ingest-feedback');
 
-  const constitutionTemplates: Record<string, string> = {
-    'titulo_1_principios.md': `# Título I: De los Principios Fundamentales\n\n## Artículo 1: Estado Social de Derecho\nColombia es un Estado social de derecho, organizado en forma de República unitaria, descentralizada, con autonomía de sus entidades territoriales, democrática, participativa y pluralista, fundada en el respeto de la dignidad humana, en el trabajo y la solidaridad de las personas que la integran y en la prevalencia del interés general.\n\n## Artículo 2: Fines Esenciales del Estado\nSon fines esenciales del Estado: servir a la comunidad, promover la prosperidad general y garantizar la efectividad de los principios, derechos y deberes consagrados en la Constitución.\n\n## Artículo 4: Supremacía Constitucional\nLa Constitución es norma de normas. En todo caso de incompatibilidad entre la Constitución y la ley u otra norma jurídica, se aplicarán las disposiciones constitucionales.`,
-    'titulo_2_derechos.md': `# Título II: De los Derechos, las Garantías y los Deberes\n\n## Artículo 11: Derecho a la Vida\nEl derecho a la vida es inviolable. No habrá pena de muerte.\n\n## Artículo 12: Integridad Personal\nNadie será sometido a desaparición forzada, a torturas ni a tratos o penas crueles, inhumanos o degradantes.\n\n## Artículo 23: Derecho de Petición\nToda persona tiene derecho a presentar peticiones respetuosas a las autoridades por motivos de interés general o particular y a obtener pronta resolución.\n\n## Artículo 86: Acción de Tutela\nToda persona tendrá acción de tutela para reclamar ante los jueces, en todo momento y lugar, mediante un procedimiento preferente y sumario, la protección inmediata de sus derechos constitucionales fundamentales.`,
-    'titulo_4_participacion.md': `# Título IV: De la Participación Democrática\n\n## Artículo 103: Mecanismos de Participación Ciudadana\nSon mecanismos de participación del pueblo en ejercicio de su soberanía: el voto, el plebiscito, el referendo, la consulta popular, el cabildo abierto, la iniciativa popular y la revocatoria del mandato.\n\n## Artículo 104: Consulta Popular Nacional\nEl Presidente de la República, con la firma de todos los ministros y previo concepto favorable del Senado, podrá consultar al pueblo decisiones de trascendencia nacional.`,
-    'estructura_estado.md': `# Estructura del Estado Colombiano\n\n## Principio de Separación y Colaboración Funcional (Art. 113 C.P.)\nEl Estado colombiano fundamenta su operatividad en la división tripartita tradicional, atemperada por el principio de colaboración armónica y frenos y contrapesos.\n\n## Ramas del Poder Público (Arts. 114, 115, 116 C.P.)\nRama Legislativa (Congreso de la República), Rama Ejecutiva (Presidente y Ministerios) y Rama Judicial (Cortes, Tribunales, Juzgados y Fiscalía General).`,
-    'cpaca_ley_1437.md': `# Código de Procedimiento Administrativo y de lo Contencioso Administrativo (Ley 1437 de 2011)\n\n## Derecho de Petición (Arts. 13 al 33 CPACA)\nToda persona tiene derecho a presentar peticiones respetuosas. Términos de resolución: 15 días hábiles regla general, 10 días para información y copias, 30 días para consultas.\n\n## Recursos en Vía Gubernativa (Arts. 74-82 CPACA)\nReposición (ante el mismo funcionario) y Apelación (ante el superior jerárquico). Plazo de 10 días para interponer.\n\n## Medios de Control y Caducidad\nNulidad y Restablecimiento del Derecho (Art. 138, caducidad 4 meses). Reparación Directa (Art. 140, caducidad 2 años).`,
-    'codigo_procesal_penal_ley_906.md': `# Código de Procedimiento Penal (Ley 906 de 2004)\n\n## Principios Rectores y Presunción de Inocencia (Arts. 1-27 CPP)\nToda persona se presume inocente mientras no se declare judicialmente su culpabilidad. La defensa técnica es irrenunciable.\n\n## Régimen de Captura y Plazo de 36 Horas (Arts. 297-302 CPP)\nCaptura por orden judicial o flagrancia. Puesta a disposición del Juez de Control de Garantías dentro de las 36 horas siguientes.\n\n## Medidas de Aseguramiento (Art. 308 CPP)\nProceden para evitar obstrucción de la justicia, proteger a la comunidad o asegurar comparecencia.`,
-    'codigo_sustantivo_trabajo_cst.md': `# Régimen Laboral Colombiano (CST y Ley 100 de 1993)\n\n## Elementos Esenciales del Contrato de Trabajo (Art. 23 CST)\n1) Actividad personal, 2) Continuada subordinación o dependencia, y 3) Salario como retribución. Presunción del Art. 24 CST.\n\n## Despido Injustificado e Indemnizaciones (Art. 64 CST)\nEn contratos indefinidos: 30 días de salario por el primer año y 20 días por año subsiguiente (salarios menores a 10 SMLMV).\n\n## Estabilidad Laboral Reforzada (Maternidad y Salud)\nFuero de maternidad (Art. 239 CST) y fuero de salud (Ley 361 de 1997, Art. 26). El despido sin permiso del Ministerio del Trabajo es ineficaz.`,
-    'codigo_general_proceso_cgp.md': `# Código General del Proceso (Ley 1564 de 2012)\n\n## Factores de Competencia Judicial (Arts. 15-34 CGP)\nCuantía: Mínima (hasta 40 SMLMV), Menor (40 a 150 SMLMV) y Mayor (superior a 150 SMLMV). Territorio: regla general domicilio del demandado.\n\n## Carga Dinámica de la Prueba (Art. 167 CGP)\nEl juez podrá distribuir la carga probatoria exigiendo acreditar a la parte que se encuentre en mejor condición material o técnica.\n\n## Proceso Ejecutivo (Art. 422 CGP)\nEjecución coactiva sobre obligaciones expresas, claras y exigibles provenientes del deudor.`
+  // Modal Tabs elements
+  const tabBtnChunks = document.getElementById('tab-btn-chunks');
+  const tabBtnIngest = document.getElementById('tab-btn-ingest');
+  const panelChunks = document.getElementById('panel-chunks');
+  const panelIngest = document.getElementById('panel-ingest');
+  const chunksBadge = document.getElementById('chunks-badge');
+  const chunksListContainer = document.getElementById('chunks-list-container');
+  const searchChunkInput = document.getElementById('search-chunk-input') as HTMLInputElement;
+  const reloadChunksBtn = document.getElementById('reload-chunks-btn');
+
+  // Inline Chunk Editor elements
+  const inlineEditor = document.getElementById('inline-chunk-editor');
+  const editingChunkId = document.getElementById('editing-chunk-id');
+  const editChunkTitle = document.getElementById('edit-chunk-title') as HTMLInputElement;
+  const editChunkDomain = document.getElementById('edit-chunk-domain') as HTMLSelectElement;
+  const editChunkContent = document.getElementById('edit-chunk-content') as HTMLTextAreaElement;
+  const cancelEditChunkBtn = document.getElementById('cancel-edit-chunk-btn');
+  const saveChunkBtn = document.getElementById('save-chunk-btn') as HTMLButtonElement;
+
+  const constitutionTemplates: Record<string, { domain: string; content: string }> = {
+    'titulo_1_principios.md': {
+      domain: 'transversal',
+      content: `# Título I: De los Principios Fundamentales\n\n## Artículo 1: Estado Social de Derecho\nColombia es un Estado social de derecho, organizado en forma de República unitaria, descentralizada, con autonomía de sus entidades territoriales, democrática, participativa y pluralista, fundada en el respeto de la dignidad humana, en el trabajo y la solidaridad de las personas que la integran y en la prevalencia del interés general.\n\n## Artículo 2: Fines Esenciales del Estado\nSon fines esenciales del Estado: servir a la comunidad, promover la prosperidad general y garantizar la efectividad de los principios, derechos y deberes consagrados en la Constitución.\n\n## Artículo 4: Supremacía Constitucional\nLa Constitución es norma de normas. En todo caso de incompatibilidad entre la Constitución y la ley u otra norma jurídica, se aplicarán las disposiciones constitucionales.`
+    },
+    'titulo_2_derechos.md': {
+      domain: 'transversal',
+      content: `# Título II: De los Derechos, las Garantías y los Deberes\n\n## Artículo 11: Derecho a la Vida\nEl derecho a la vida es inviolable. No habrá pena de muerte.\n\n## Artículo 12: Integridad Personal\nNadie será sometido a desaparición forzada, a torturas ni a tratos o penas crueles, inhumanos o degradantes.\n\n## Artículo 23: Derecho de Petición\nToda persona tiene derecho a presentar peticiones respetuosas a las autoridades por motivos de interés general o particular y a obtener pronta resolución.\n\n## Artículo 86: Acción de Tutela\nToda persona tendrá acción de tutela para reclamar ante los jueces, en todo momento y lugar, mediante un procedimiento preferente y sumario, la protección inmediata de sus derechos constitucionales fundamentales.`
+    },
+    'titulo_4_participacion.md': {
+      domain: 'constitucional',
+      content: `# Título IV: De la Participación Democrática\n\n## Artículo 103: Mecanismos de Participación Ciudadana\nSon mecanismos de participación del pueblo en ejercicio de su soberanía: el voto, el plebiscito, el referendo, la consulta popular, el cabildo abierto, la iniciativa popular y la revocatoria del mandato.\n\n## Artículo 104: Consulta Popular Nacional\nEl Presidente de la República, con la firma de todos los ministros y previo concepto favorable del Senado, podrá consultar al pueblo decisiones de trascendencia nacional.`
+    },
+    'estructura_estado.md': {
+      domain: 'constitucional',
+      content: `# Estructura del Estado Colombiano\n\n## Principio de Separación y Colaboración Funcional (Art. 113 C.P.)\nEl Estado colombiano fundamenta su operatividad en la división tripartita tradicional, atemperada por el principio de colaboración armónica y frenos y contrapesos.\n\n## Ramas del Poder Público (Arts. 114, 115, 116 C.P.)\nRama Legislativa (Congreso de la República), Rama Ejecutiva (Presidente y Ministerios) y Rama Judicial (Cortes, Tribunales, Juzgados y Fiscalía General).`
+    },
+    'cpaca_ley_1437.md': {
+      domain: 'administrativo',
+      content: `# Código de Procedimiento Administrativo y de lo Contencioso Administrativo (Ley 1437 de 2011)\n\n## Derecho de Petición (Arts. 13 al 33 CPACA)\nToda persona tiene derecho a presentar peticiones respetuosas. Términos de resolución: 15 días hábiles regla general, 10 días para información y copias, 30 días para consultas.\n\n## Recursos en Vía Gubernativa (Arts. 74-82 CPACA)\nReposición (ante el mismo funcionario) y Apelación (ante el superior jerárquico). Plazo de 10 días para interponer.\n\n## Medios de Control y Caducidad\nNulidad y Restablecimiento del Derecho (Art. 138, caducidad 4 meses). Reparación Directa (Art. 140, caducidad 2 años).`
+    },
+    'codigo_procesal_penal_ley_906.md': {
+      domain: 'penal',
+      content: `# Código de Procedimiento Penal (Ley 906 de 2004)\n\n## Principios Rectores y Presunción de Inocencia (Arts. 1-27 CPP)\nToda persona se presume inocente mientras no se declare judicialmente su culpabilidad. La defensa técnica es irrenunciable.\n\n## Régimen de Captura y Plazo de 36 Horas (Arts. 297-302 CPP)\nCaptura por orden judicial o flagrancia. Puesta a disposición del Juez de Control de Garantías dentro de las 36 horas siguientes.\n\n## Medidas de Aseguramiento (Art. 308 CPP)\nProceden para evitar obstrucción de la justicia, proteger a la comunidad o asegurar comparecencia.`
+    },
+    'codigo_sustantivo_trabajo_cst.md': {
+      domain: 'laboral',
+      content: `# Régimen Laboral Colombiano (CST y Ley 100 de 1993)\n\n## Elementos Esenciales del Contrato de Trabajo (Art. 23 CST)\n1) Actividad personal, 2) Continuada subordinación o dependencia, y 3) Salario como retribución. Presunción del Art. 24 CST.\n\n## Despido Injustificado e Indemnizaciones (Art. 64 CST)\nEn contratos indefinidos: 30 días de salario por el primer año y 20 días por año subsiguiente (salarios menores a 10 SMLMV).\n\n## Estabilidad Laboral Reforzada (Maternidad y Salud)\nFuero de maternidad (Art. 239 CST) y fuero de salud (Ley 361 de 1997, Art. 26). El despido sin permiso del Ministerio del Trabajo es ineficaz.`
+    },
+    'codigo_general_proceso_cgp.md': {
+      domain: 'civil',
+      content: `# Código General del Proceso (Ley 1564 de 2012)\n\n## Factores de Competencia Judicial (Arts. 15-34 CGP)\nCuantía: Mínima (hasta 40 SMLMV), Menor (40 a 150 SMLMV) y Mayor (superior a 150 SMLMV). Territorio: regla general domicilio del demandado.\n\n## Carga Dinámica de la Prueba (Art. 167 CGP)\nEl juez podrá distribuir la carga probatoria exigiendo acreditar a la parte que se encuentre en mejor condición material o técnica.\n\n## Proceso Ejecutivo (Art. 422 CGP)\nEjecución coactiva sobre obligaciones expresas, claras y exigibles provenientes del deudor.`
+    }
   };
 
   async function loadAgents() {
@@ -237,19 +408,27 @@
             <td class="py-3 px-4">
               <div class="flex items-center gap-1.5 font-mono text-xs">
                 <span class="material-symbols-outlined text-[16px] text-tertiary">article</span>
-                <span class="text-on-surface">${a.documentosCount ?? 0}</span>
+                <span class="text-on-surface font-semibold">${a.documentosCount ?? 0}</span>
                 <button
-                  class="ml-1 text-[11px] text-[#06b6d4] hover:underline open-ingest-btn"
+                  class="ml-1 text-[11px] text-[#06b6d4] hover:underline open-knowledge-btn"
                   data-agent-id="${a.id}"
                   data-agent-name="${a.nombre}"
-                  title="Subir conocimiento .md"
+                  data-agent-slug="${a.slug}"
+                  title="Gestionar fragmentos de conocimiento"
                 >
-                  + Ingestar
+                  Gestionar
                 </button>
               </div>
             </td>
             <td class="py-3 px-4 text-right">
               <div class="inline-flex items-center gap-1.5">
+                <a
+                  href="/editar/${a.id}"
+                  class="p-1.5 rounded bg-[#1e293b] hover:bg-[#334155] text-[#f38020] transition-colors inline-flex items-center"
+                  title="Modificar parámetros del agente"
+                >
+                  <span class="material-symbols-outlined text-[18px]">edit</span>
+                </a>
                 <a
                   href="/chat/${a.id}"
                   class="p-1.5 rounded bg-[#1e293b] hover:bg-[#334155] text-primary transition-colors inline-flex items-center"
@@ -289,19 +468,233 @@
       });
     });
 
-    document.querySelectorAll('.open-ingest-btn').forEach((btn) => {
+    document.querySelectorAll('.open-knowledge-btn').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         const target = e.currentTarget as HTMLElement;
         selectedAgentId = Number(target.dataset.agentId);
         const name = target.dataset.agentName;
-        if (modalTitle) modalTitle.textContent = `Ingestar en: ${name}`;
-        if (ingestModal) ingestModal.classList.remove('hidden');
-        if (ingestFeedback) ingestFeedback.classList.add('hidden');
+        const slug = target.dataset.agentSlug;
+        openKnowledgeModal(selectedAgentId, name || '', slug || '');
       });
     });
   }
 
-  // Filter input handler
+  function switchTab(tab: 'chunks' | 'ingest') {
+    if (tab === 'chunks') {
+      tabBtnChunks?.classList.add('bg-[#1e293b]', 'text-[#06b6d4]', 'border', 'border-[#06b6d4]/40');
+      tabBtnChunks?.classList.remove('text-[#a58c7d]');
+      tabBtnIngest?.classList.remove('bg-[#1e293b]', 'text-[#06b6d4]', 'border', 'border-[#06b6d4]/40');
+      tabBtnIngest?.classList.add('text-[#a58c7d]');
+      panelChunks?.classList.remove('hidden');
+      panelIngest?.classList.add('hidden');
+    } else {
+      tabBtnIngest?.classList.add('bg-[#1e293b]', 'text-[#06b6d4]', 'border', 'border-[#06b6d4]/40');
+      tabBtnIngest?.classList.remove('text-[#a58c7d]');
+      tabBtnChunks?.classList.remove('bg-[#1e293b]', 'text-[#06b6d4]', 'border', 'border-[#06b6d4]/40');
+      tabBtnChunks?.classList.add('text-[#a58c7d]');
+      panelIngest?.classList.remove('hidden');
+      panelIngest?.classList.add('flex');
+      panelChunks?.classList.add('hidden');
+    }
+  }
+
+  tabBtnChunks?.addEventListener('click', () => switchTab('chunks'));
+  tabBtnIngest?.addEventListener('click', () => switchTab('ingest'));
+
+  async function openKnowledgeModal(agentId: number, name: string, slug: string) {
+    if (modalTitle) modalTitle.textContent = `Base de Conocimiento: ${name}`;
+    if (modalSubtitle) modalSubtitle.textContent = `Gestión de fragmentos indexados para agente #${agentId} (${slug})`;
+    if (ingestModal) ingestModal.classList.remove('hidden');
+    if (ingestFeedback) ingestFeedback.classList.add('hidden');
+    if (inlineEditor) inlineEditor.classList.add('hidden');
+    switchTab('chunks');
+    await loadChunksForAgent(agentId);
+  }
+
+  async function loadChunksForAgent(agentId: number) {
+    if (!chunksListContainer) return;
+    chunksListContainer.innerHTML = `<div class="py-6 text-center text-[#a58c7d] font-mono text-xs">Cargando fragmentos indexados...</div>`;
+
+    try {
+      // Fetch both agent's direct documents and domain knowledge if general
+      const res = await apiClient.getConocimiento(agentId);
+      currentChunks = res.data || [];
+      if (chunksBadge) chunksBadge.textContent = String(currentChunks.length);
+      renderChunks(currentChunks);
+    } catch (err: any) {
+      chunksListContainer.innerHTML = `<div class="p-3 bg-[#ef4444]/10 border border-[#ef4444] rounded text-error font-mono text-xs text-center">Error al cargar fragmentos: ${err.message}</div>`;
+    }
+  }
+
+  function renderChunks(chunks: any[]) {
+    if (!chunksListContainer) return;
+    if (chunks.length === 0) {
+      chunksListContainer.innerHTML = `
+        <div class="py-8 text-center text-[#a58c7d] font-mono text-xs">
+          <p>No hay fragmentos de conocimiento indexados directamente para este agente.</p>
+          <button id="go-to-ingest-btn" class="mt-2 text-[#06b6d4] hover:underline font-semibold">
+            + Ingestar el primer documento .md
+          </button>
+        </div>
+      `;
+      document.getElementById('go-to-ingest-btn')?.addEventListener('click', () => switchTab('ingest'));
+      return;
+    }
+
+    const domainColors: Record<string, string> = {
+      transversal: 'bg-[#6366f1]/20 text-[#818cf8] border-[#6366f1]/40',
+      constitucional: 'bg-[#06b6d4]/20 text-[#22d3ee] border-[#06b6d4]/40',
+      administrativo: 'bg-[#f59e0b]/20 text-[#fbbf24] border-[#f59e0b]/40',
+      penal: 'bg-[#ef4444]/20 text-[#f87171] border-[#ef4444]/40',
+      laboral: 'bg-[#10b981]/20 text-[#34d399] border-[#10b981]/40',
+      civil: 'bg-[#ec4899]/20 text-[#f472b6] border-[#ec4899]/40'
+    };
+
+    chunksListContainer.innerHTML = chunks
+      .map((c) => {
+        const dColor = domainColors[c.dominio || 'transversal'] || domainColors.transversal;
+        return `
+          <div class="p-3 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] transition-colors flex flex-col gap-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex flex-col">
+                <span class="font-medium text-xs text-on-surface flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[14px] text-tertiary">article</span>
+                  ${c.tituloSeccion || 'Sección'}
+                </span>
+                <span class="text-[10px] font-mono text-[#a58c7d]">${c.nombreArchivo || 'documento.md'}</span>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="px-2 py-0.5 rounded border text-[10px] font-mono uppercase ${dColor}">
+                  ${c.dominio || 'transversal'}
+                </span>
+                <button
+                  class="p-1 rounded bg-[#1e293b] hover:bg-[#334155] text-[#06b6d4] transition-colors edit-chunk-btn"
+                  data-chunk-id="${c.id}"
+                  title="Editar sección"
+                >
+                  <span class="material-symbols-outlined text-[14px]">edit</span>
+                </button>
+                <button
+                  class="p-1 rounded bg-[#1e293b] hover:bg-[#ef4444]/20 text-error transition-colors delete-chunk-btn"
+                  data-chunk-id="${c.id}"
+                  data-chunk-title="${c.tituloSeccion}"
+                  title="Eliminar fragmento"
+                >
+                  <span class="material-symbols-outlined text-[14px]">delete</span>
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-[#94a3b8] line-clamp-2 font-mono bg-[#111827]/50 p-1.5 rounded border border-[#1e293b]/50">
+              ${c.contenido || ''}
+            </p>
+          </div>
+        `;
+      })
+      .join('');
+
+    // Attach edit events
+    document.querySelectorAll('.edit-chunk-btn').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const id = Number((e.currentTarget as HTMLElement).dataset.chunkId);
+        const chunk = currentChunks.find((item) => item.id === id);
+        if (chunk) {
+          openChunkEditor(chunk);
+        }
+      });
+    });
+
+    // Attach delete events
+    document.querySelectorAll('.delete-chunk-btn').forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const id = Number(target.dataset.chunkId);
+        const title = target.dataset.chunkTitle || 'esta sección';
+        if (!selectedAgentId) return;
+
+        if (confirm(`¿Eliminar la sección "${title}" de la base de conocimiento?`)) {
+          try {
+            await apiClient.deleteConocimiento(selectedAgentId, id);
+            await loadChunksForAgent(selectedAgentId);
+            await loadAgents(); // update count in table
+          } catch (err: any) {
+            alert(`Error al eliminar fragmento: ${err.message}`);
+          }
+        }
+      });
+    });
+  }
+
+  function openChunkEditor(chunk: any) {
+    if (!inlineEditor) return;
+    if (editingChunkId) editingChunkId.textContent = String(chunk.id);
+    if (editChunkTitle) editChunkTitle.value = chunk.tituloSeccion || '';
+    if (editChunkDomain) editChunkDomain.value = chunk.dominio || 'transversal';
+    if (editChunkContent) editChunkContent.value = chunk.contenido || '';
+    inlineEditor.classList.remove('hidden');
+    inlineEditor.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  cancelEditChunkBtn?.addEventListener('click', () => {
+    if (inlineEditor) inlineEditor.classList.add('hidden');
+  });
+
+  saveChunkBtn?.addEventListener('click', async () => {
+    if (!selectedAgentId) return;
+    const chunkId = Number(editingChunkId?.textContent);
+    if (!chunkId) return;
+
+    const newTitle = editChunkTitle.value.trim();
+    const newDomain = editChunkDomain.value;
+    const newContent = editChunkContent.value.trim();
+
+    if (!newTitle || !newContent) {
+      alert('Título y contenido son obligatorios.');
+      return;
+    }
+
+    saveChunkBtn.disabled = true;
+    saveChunkBtn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Guardando...`;
+
+    try {
+      await apiClient.updateConocimiento(selectedAgentId, {
+        documentoId: chunkId,
+        tituloSeccion: newTitle,
+        dominio: newDomain,
+        contenido: newContent
+      });
+
+      if (inlineEditor) inlineEditor.classList.add('hidden');
+      await loadChunksForAgent(selectedAgentId);
+    } catch (err: any) {
+      alert(`Error al guardar cambios: ${err.message}`);
+    } finally {
+      saveChunkBtn.disabled = false;
+      saveChunkBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">save</span><span>Guardar Cambios</span>`;
+    }
+  });
+
+  // Filter chunks by input
+  searchChunkInput?.addEventListener('input', () => {
+    const q = searchChunkInput.value.toLowerCase().trim();
+    if (!q) {
+      renderChunks(currentChunks);
+      return;
+    }
+    const filtered = currentChunks.filter(
+      (c) =>
+        (c.tituloSeccion || '').toLowerCase().includes(q) ||
+        (c.contenido || '').toLowerCase().includes(q) ||
+        (c.dominio || '').toLowerCase().includes(q) ||
+        (c.nombreArchivo || '').toLowerCase().includes(q)
+    );
+    renderChunks(filtered);
+  });
+
+  reloadChunksBtn?.addEventListener('click', () => {
+    if (selectedAgentId) loadChunksForAgent(selectedAgentId);
+  });
+
+  // Filter agents input handler
   searchInput?.addEventListener('input', () => {
     const q = searchInput.value.toLowerCase().trim();
     if (!q) {
@@ -327,13 +720,15 @@
     const selected = quickDocSelect.value;
     if (selected && constitutionTemplates[selected]) {
       docFilenameInput.value = selected;
-      docContentInput.value = constitutionTemplates[selected] || '';
+      docDomainInput.value = constitutionTemplates[selected].domain;
+      docContentInput.value = constitutionTemplates[selected].content;
     }
   });
 
   submitIngestBtn?.addEventListener('click', async () => {
     if (!selectedAgentId) return;
     const filename = docFilenameInput.value.trim();
+    const domain = docDomainInput.value;
     const content = docContentInput.value.trim();
 
     if (!filename || !content) {
@@ -345,16 +740,17 @@
     submitIngestBtn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Indexando...`;
 
     try {
-      const res = await apiClient.ingestarConocimiento(selectedAgentId, filename, content);
+      const res = await apiClient.ingestarConocimiento(selectedAgentId, filename, content, domain);
       if (ingestFeedback) {
         ingestFeedback.className = 'p-2.5 rounded font-mono text-xs bg-[#10b981]/20 border border-[#10b981] text-tertiary';
         ingestFeedback.textContent = `¡Éxito! Se indexaron ${res.chunksIngested} secciones en D1 y Vectorize.`;
         ingestFeedback.classList.remove('hidden');
       }
-      setTimeout(() => {
-        ingestModal?.classList.add('hidden');
-        loadAgents();
-      }, 1200);
+      setTimeout(async () => {
+        if (selectedAgentId) await loadChunksForAgent(selectedAgentId);
+        await loadAgents();
+        switchTab('chunks');
+      }, 1000);
     } catch (err: any) {
       if (ingestFeedback) {
         ingestFeedback.className = 'p-2.5 rounded font-mono text-xs bg-[#ef4444]/20 border border-[#ef4444] text-error';

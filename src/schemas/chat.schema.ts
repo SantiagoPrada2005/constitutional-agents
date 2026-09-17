@@ -12,5 +12,16 @@ export const IngestDocumentSchema = z.object({
   habilidadId: z.number().optional()
 });
 
+export const UpdateDocumentChunkSchema = z.object({
+  documentoId: z.number().int().positive('ID de documento requerido').optional(),
+  id: z.number().int().positive().optional(),
+  tituloSeccion: z.string().min(1, 'El título de la sección no puede estar vacío').optional(),
+  contenido: z.string().min(5, 'El contenido debe tener al menos 5 caracteres').optional(),
+  dominio: z.string().optional()
+}).refine((data) => data.documentoId !== undefined || data.id !== undefined, {
+  message: 'documentoId o id es obligatorio'
+});
+
 export type ChatQueryDTO = z.infer<typeof ChatQuerySchema>;
 export type IngestDocumentDTO = z.infer<typeof IngestDocumentSchema>;
+export type UpdateDocumentChunkDTO = z.infer<typeof UpdateDocumentChunkSchema>;

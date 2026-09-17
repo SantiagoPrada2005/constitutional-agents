@@ -27,7 +27,7 @@ export class ApiClient {
     const url = `${this.baseUrl}${endpoint}`;
     const headers = new Headers(options.headers || {});
 
-    if (!headers.has('Content-Type') && options.body && typeof options.body === 'string') {
+    if (!headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
     }
 
@@ -88,10 +88,31 @@ export class ApiClient {
     });
   }
 
-  async ingestarConocimiento(id: number, nombreArchivo: string, contenido: string): Promise<IngestResponse> {
+  async ingestarConocimiento(id: number, nombreArchivo: string, contenido: string, dominio?: string, habilidadId?: number): Promise<IngestResponse> {
     return this.request<IngestResponse>(`/agentes/${id}/conocimiento`, {
       method: 'POST',
-      body: JSON.stringify({ nombreArchivo, contenido })
+      body: JSON.stringify({ nombreArchivo, contenido, dominio, habilidadId })
+    });
+  }
+
+  async getConocimiento(id: number, options?: { all?: boolean; dominio?: string }) {
+    const params = new URLSearchParams();
+    if (options?.all) params.set('all', 'true');
+    if (options?.dominio) params.set('dominio', options.dominio);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return this.request<{ success: boolean; count: number; data: any[] }>(`/agentes/${id}/conocimiento${query}`);
+  }
+
+  async updateConocimiento(id: number, data: { documentoId: number; tituloSeccion?: string; contenido?: string; dominio?: string }) {
+    return this.request<ApiResponse>(`/agentes/${id}/conocimiento`, {
+      method: 'PUT',
+      body: JSON.stringify(data)
+    });
+  }
+
+  async deleteConocimiento(id: number, documentoId: number) {
+    return this.request<ApiResponse>(`/agentes/${id}/conocimiento?documentoId=${documentoId}`, {
+      method: 'DELETE'
     });
   }
 

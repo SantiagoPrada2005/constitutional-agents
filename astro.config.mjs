@@ -10,6 +10,9 @@ export default defineConfig({
     }
   }),
   vite: {
-    plugins: [tailwindcss()]
-  }
+    plugins: [tailwindcss()],
+    optimizeDeps: {
+      include: ['drizzle-orm', 'drizzle-orm/d1', 'zod']
+    }
+  },
 });

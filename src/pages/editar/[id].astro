@@ -1,0 +1,25 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import EditAgentForm from '../../components/EditAgentForm.astro';
+
+const { id } = Astro.params;
+const agentId = Number(id);
+---
+
+<Layout title={`Modificar Agente #${agentId} | Constitutional AI`} activePath="/">
+  <div class="flex flex-col gap-4">
+    <div class="flex items-center gap-2 font-mono text-xs text-[#a58c7d] mb-2">
+      <a href="/" class="hover:text-white transition-colors">Gestión de Agentes</a>
+      <span>/</span>
+      <span class="text-primary">Editar Agente #{agentId}</span>
+    </div>
+
+    {isNaN(agentId) ? (
+      <div class="p-6 bg-[#111827] border border-[#ef4444] rounded-xl text-center font-mono text-error text-sm">
+        ID de agente inválido proporcionado en la ruta.
+      </div>
+    ) : (
+      <EditAgentForm agentId={agentId} />
+    )}
+  </div>
+</Layout>

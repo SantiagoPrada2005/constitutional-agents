@@ -1,0 +1,413 @@
+---
+// EditAgentForm.astro - Edit & Configuration Form for Existing Agent
+interface Props {
+  agentId: number;
+}
+
+const { agentId } = Astro.props;
+---
+
+<div class="bg-[#111827] border border-[#1e293b] rounded-xl p-6 shadow-xl max-w-3xl mx-auto" data-agent-id={agentId} id="edit-agent-root">
+  <div class="flex items-center justify-between border-b border-[#1e293b] pb-4 mb-6">
+    <div class="flex items-center gap-3">
+      <div class="p-2 rounded-lg bg-[#1e293b] text-[#f38020]">
+        <span class="material-symbols-outlined text-[24px]">edit_note</span>
+      </div>
+      <div>
+        <h2 class="text-lg font-semibold text-on-surface" id="edit-form-header-title">Modificar Agente de IA #{agentId}</h2>
+        <p class="text-xs text-[#a58c7d] font-mono">Actualización de parámetros, modelo y catálogo relacional de habilidades</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <a href={`/chat/${agentId}`} class="px-2.5 py-1.5 rounded bg-[#1e293b] hover:bg-[#334155] text-xs font-mono text-primary flex items-center gap-1 transition-colors">
+        <span class="material-symbols-outlined text-[16px]">chat</span>
+        <span>Consola RAG</span>
+      </a>
+      <a href="/" class="text-xs font-mono text-[#a58c7d] hover:text-white flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+        <span>Dashboard</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div id="loading-state" class="py-12 text-center text-[#a58c7d] font-mono text-xs">
+    <div class="inline-flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-[#f38020] animate-ping"></span>
+      <span>Cargando datos del agente desde Cloudflare D1...</span>
+    </div>
+  </div>
+
+  <form id="edit-agent-form" class="hidden flex-col gap-5">
+    <!-- Row 1: Nombre & Slug -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="agent-name" class="block font-mono text-xs text-[#a58c7d] mb-1">
+          Nombre del Agente <span class="text-error">*</span>
+        </label>
+        <input
+          type="text"
+          id="agent-name"
+          name="nombre"
+          required
+          placeholder="ej. Asesor de Tutela Express"
+          class="w-full bg-[#0b0f17] border border-[#1e293b] rounded-lg p-2.5 text-sm text-on-surface placeholder-[#64748b] focus:outline-none focus:border-primary transition-colors font-mono"
+        />
+      </div>
+
+      <div>
+        <label for="agent-slug" class="block font-mono text-xs text-[#a58c7d] mb-1">
+          Slug Identificador (Único) <span class="text-error">*</span>
+        </label>
+        <input
+          type="text"
+          id="agent-slug"
+          name="slug"
+          required
+          placeholder="ej. asesor-tutela-express"
+          pattern="^[a-z0-9-]+$"
+          class="w-full bg-[#0b0f17] border border-[#1e293b] rounded-lg p-2.5 text-sm text-primary placeholder-[#64748b] focus:outline-none focus:border-primary transition-colors font-mono"
+        />
+      </div>
+    </div>
+
+    <!-- Row 2: Rol & Modelo -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="agent-role" class="block font-mono text-xs text-[#a58c7d] mb-1">
+          Rol Constitucional / Especialidad <span class="text-error">*</span>
+        </label>
+        <input
+          type="text"
+          id="agent-role"
+          name="rol"
+          required
+          placeholder="ej. Especialista en Acción de Tutela (Art. 86)"
+          class="w-full bg-[#0b0f17] border border-[#1e293b] rounded-lg p-2.5 text-sm text-on-surface placeholder-[#64748b] focus:outline-none focus:border-primary transition-colors font-mono"
+        />
+      </div>
+
+      <div>
+        <label for="agent-model" class="block font-mono text-xs text-[#a58c7d] mb-1">
+          Modelo Workers AI (Edge)
+        </label>
+        <select
+          id="agent-model"
+          name="modelo"
+          class="w-full bg-[#0b0f17] border border-[#1e293b] rounded-lg p-2.5 text-sm text-secondary focus:outline-none focus:border-primary transition-colors font-mono"
+        >
+          <option value="@cf/meta/llama-4-scout-17b-16e-instruct">@cf/meta/llama-4-scout-17b-16e-instruct (Recomendado)</option>
+          <option value="@cf/mistral/mistral-7b-instruct-v0.1">@cf/mistral/mistral-7b-instruct-v0.1</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Row 3: Temperatura Slider & Estado Activo -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+      <div class="md:col-span-2 p-3 bg-[#0b0f17] border border-[#1e293b] rounded-lg">
+        <div class="flex items-center justify-between mb-2">
+          <label for="agent-temp" class="font-mono text-xs text-[#a58c7d]">
+            Temperatura de Inferencia
+          </label>
+          <span id="temp-display" class="font-mono text-xs font-bold text-tertiary">0.20</span>
+        </div>
+        <input
+          type="range"
+          id="agent-temp"
+          name="temperatura"
+          min="0"
+          max="1"
+          step="0.05"
+          value="0.2"
+          class="w-full accent-primary cursor-pointer"
+        />
+        <div class="flex justify-between font-mono text-[10px] text-[#64748b] mt-1">
+          <span>0.0 (Rigor estricto)</span>
+          <span>0.5 (Equilibrado)</span>
+          <span>1.0 (Creativo)</span>
+        </div>
+      </div>
+
+      <div class="p-3 bg-[#0b0f17] border border-[#1e293b] rounded-lg flex flex-col justify-center h-full">
+        <label class="font-mono text-xs text-[#a58c7d] mb-1 block">Estado Operativo</label>
+        <label class="inline-flex items-center gap-2 cursor-pointer mt-1">
+          <input type="checkbox" id="agent-active" name="activo" value="1" class="sr-only peer" checked />
+          <div class="w-9 h-5 bg-[#334155] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-tertiary relative"></div>
+          <span id="active-label" class="font-mono text-xs text-on-surface font-medium">Activo</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Row 4: Habilidades Relacionales -->
+    <div>
+      <label class="block font-mono text-xs text-[#a58c7d] mb-2">
+        Habilidades del Catálogo Relacional (agente_habilidades)
+      </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="skills-container">
+        <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] cursor-pointer">
+          <input type="checkbox" name="habilidades" value="CONSTITUCIONAL" class="mt-0.5 accent-primary" />
+          <div class="flex flex-col">
+            <span class="font-mono text-xs font-medium text-on-surface">CONSTITUCIONAL</span>
+            <span class="text-[11px] text-[#a58c7d]">Estructura dogmática y principios del Estado</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] cursor-pointer">
+          <input type="checkbox" name="habilidades" value="DERECHOS_FUNDAMENTALES" class="mt-0.5 accent-primary" />
+          <div class="flex flex-col">
+            <span class="font-mono text-xs font-medium text-on-surface">DERECHOS_FUNDAMENTALES</span>
+            <span class="text-[11px] text-[#a58c7d]">Título II: libertades, igualdad y debido proceso</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] cursor-pointer">
+          <input type="checkbox" name="habilidades" value="TUTELA" class="mt-0.5 accent-primary" />
+          <div class="flex flex-col">
+            <span class="font-mono text-xs font-medium text-on-surface">TUTELA</span>
+            <span class="text-[11px] text-[#a58c7d]">Acción de tutela, subsidiariedad e inmediatez (Art. 86)</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] cursor-pointer">
+          <input type="checkbox" name="habilidades" value="MECANISMOS_PARTICIPACION" class="mt-0.5 accent-primary" />
+          <div class="flex flex-col">
+            <span class="font-mono text-xs font-medium text-on-surface">MECANISMOS_PARTICIPACION</span>
+            <span class="text-[11px] text-[#a58c7d]">Plebiscito, referendo, consulta y revocatoria</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] cursor-pointer">
+          <input type="checkbox" name="habilidades" value="ESTRUCTURA_ESTADO" class="mt-0.5 accent-primary" />
+          <div class="flex flex-col">
+            <span class="font-mono text-xs font-medium text-on-surface">ESTRUCTURA_ESTADO</span>
+            <span class="text-[11px] text-[#a58c7d]">Ramas del poder público y órganos autónomos</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] cursor-pointer">
+          <input type="checkbox" name="habilidades" value="ADMINISTRATIVO" class="mt-0.5 accent-primary" />
+          <div class="flex flex-col">
+            <span class="font-mono text-xs font-medium text-on-surface">ADMINISTRATIVO</span>
+            <span class="text-[11px] text-[#a58c7d]">CPACA (Ley 1437), petición y medios de control</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] cursor-pointer">
+          <input type="checkbox" name="habilidades" value="PENAL" class="mt-0.5 accent-primary" />
+          <div class="flex flex-col">
+            <span class="font-mono text-xs font-medium text-on-surface">PENAL</span>
+            <span class="text-[11px] text-[#a58c7d]">Sistema acusatorio (Ley 906), captura y garantías</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] cursor-pointer">
+          <input type="checkbox" name="habilidades" value="LABORAL" class="mt-0.5 accent-primary" />
+          <div class="flex flex-col">
+            <span class="font-mono text-xs font-medium text-on-surface">LABORAL</span>
+            <span class="text-[11px] text-[#a58c7d]">CST, contratos, estabilidad reforzada y pensiones</span>
+          </div>
+        </label>
+
+        <label class="flex items-start gap-2.5 p-2.5 rounded-lg bg-[#0b0f17] border border-[#1e293b] hover:border-[#334155] cursor-pointer">
+          <input type="checkbox" name="habilidades" value="CIVIL" class="mt-0.5 accent-primary" />
+          <div class="flex flex-col">
+            <span class="font-mono text-xs font-medium text-on-surface">CIVIL</span>
+            <span class="text-[11px] text-[#a58c7d]">Código General del Proceso (Ley 1564) y litigio</span>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Row 5: System Prompt -->
+    <div>
+      <label for="agent-prompt" class="block font-mono text-xs text-[#a58c7d] mb-1">
+        Prompt del Sistema (Instrucciones Fundamentales de Comportamiento) <span class="text-error">*</span>
+      </label>
+      <textarea
+        id="agent-prompt"
+        name="system_prompt"
+        required
+        rows="4"
+        placeholder="Eres un asistente constitucional especializado..."
+        class="w-full bg-[#0b0f17] border border-[#1e293b] rounded-lg p-2.5 text-sm text-on-surface placeholder-[#64748b] focus:outline-none focus:border-primary transition-colors font-mono"
+      ></textarea>
+    </div>
+
+    <!-- Status Message Alert Banner -->
+    <div id="form-alert" class="hidden p-3 rounded-lg font-mono text-xs"></div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center justify-between pt-4 border-t border-[#1e293b]">
+      <button
+        type="button"
+        id="delete-agent-btn"
+        class="px-3 py-2 rounded-lg border border-[#ef4444]/40 text-error hover:bg-[#ef4444]/10 text-xs font-mono transition-colors flex items-center gap-1.5"
+      >
+        <span class="material-symbols-outlined text-[16px]">delete</span>
+        <span>Eliminar Agente</span>
+      </button>
+
+      <div class="flex items-center gap-3">
+        <a
+          href="/"
+          class="px-4 py-2 rounded-lg border border-[#334155] text-xs font-mono text-on-surface hover:bg-[#1e293b] transition-colors"
+        >
+          Cancelar
+        </a>
+        <button
+          type="submit"
+          id="submit-edit-btn"
+          class="flex items-center gap-2 px-5 py-2 rounded-lg bg-[#f38020] hover:bg-[#fb923c] text-[#0b0f17] font-semibold text-xs font-mono transition-colors shadow-[0_0_12px_rgba(243,128,32,0.3)]"
+        >
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          <span>Guardar Cambios</span>
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  import { apiClient } from '../services/client/apiClient';
+
+  const root = document.getElementById('edit-agent-root');
+  const agentId = Number(root?.dataset.agentId);
+
+  const loadingState = document.getElementById('loading-state');
+  const form = document.getElementById('edit-agent-form') as HTMLFormElement;
+  const headerTitle = document.getElementById('edit-form-header-title');
+  const nameInput = document.getElementById('agent-name') as HTMLInputElement;
+  const slugInput = document.getElementById('agent-slug') as HTMLInputElement;
+  const roleInput = document.getElementById('agent-role') as HTMLInputElement;
+  const modelSelect = document.getElementById('agent-model') as HTMLSelectElement;
+  const tempInput = document.getElementById('agent-temp') as HTMLInputElement;
+  const tempDisplay = document.getElementById('temp-display');
+  const activeInput = document.getElementById('agent-active') as HTMLInputElement;
+  const activeLabel = document.getElementById('active-label');
+  const promptInput = document.getElementById('agent-prompt') as HTMLTextAreaElement;
+  const alertBox = document.getElementById('form-alert');
+  const submitBtn = document.getElementById('submit-edit-btn') as HTMLButtonElement;
+  const deleteBtn = document.getElementById('delete-agent-btn');
+
+  // Temperature display update
+  tempInput?.addEventListener('input', () => {
+    if (tempDisplay) {
+      tempDisplay.textContent = Number(tempInput.value).toFixed(2);
+    }
+  });
+
+  // Active status toggle label update
+  activeInput?.addEventListener('change', () => {
+    if (activeLabel) {
+      activeLabel.textContent = activeInput.checked ? 'Activo' : 'Inactivo';
+    }
+  });
+
+  async function loadAgentData() {
+    if (!agentId || isNaN(agentId)) {
+      if (loadingState) loadingState.textContent = 'ID de agente no especificado o inválido.';
+      return;
+    }
+
+    try {
+      const agent = await apiClient.getAgente(agentId);
+      if (!agent) throw new Error('Agente no encontrado');
+
+      if (headerTitle) headerTitle.textContent = `Modificar Agente: ${agent.nombre} (#${agent.id})`;
+      if (nameInput) nameInput.value = agent.nombre || '';
+      if (slugInput) slugInput.value = agent.slug || '';
+      if (roleInput) roleInput.value = agent.rol || '';
+      if (modelSelect) modelSelect.value = agent.modelo || '@cf/meta/llama-4-scout-17b-16e-instruct';
+      if (tempInput) {
+        tempInput.value = String(agent.temperatura ?? 0.2);
+        if (tempDisplay) tempDisplay.textContent = Number(agent.temperatura ?? 0.2).toFixed(2);
+      }
+      if (activeInput) {
+        activeInput.checked = agent.activo === 1;
+        if (activeLabel) activeLabel.textContent = agent.activo === 1 ? 'Activo' : 'Inactivo';
+      }
+      if (promptInput) promptInput.value = agent.systemPrompt || '';
+
+      // Mark assigned skills
+      const assignedCodes: string[] = agent.habilidadesCodigos || (agent.habilidades ? agent.habilidades.split(',') : []);
+      document.querySelectorAll<HTMLInputElement>('input[name="habilidades"]').forEach((checkbox) => {
+        checkbox.checked = assignedCodes.includes(checkbox.value);
+      });
+
+      if (loadingState) loadingState.classList.add('hidden');
+      if (form) {
+        form.classList.remove('hidden');
+        form.classList.add('flex');
+      }
+    } catch (err: any) {
+      if (loadingState) {
+        loadingState.innerHTML = `<span class="text-error">Error al cargar datos del agente: ${err.message}</span>`;
+      }
+    }
+  }
+
+  // Submit update
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const checkedSkills: string[] = [];
+    document.querySelectorAll<HTMLInputElement>('input[name="habilidades"]:checked').forEach((el) => {
+      checkedSkills.push(el.value);
+    });
+
+    const payload = {
+      nombre: nameInput.value.trim(),
+      slug: slugInput.value.trim(),
+      rol: roleInput.value.trim(),
+      modelo: modelSelect.value,
+      temperatura: parseFloat(tempInput.value || '0.2'),
+      systemPrompt: promptInput.value.trim(),
+      activo: activeInput.checked ? 1 : 0,
+      habilidades: checkedSkills
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Guardando...</span>`;
+
+    try {
+      await apiClient.updateAgente(agentId, payload);
+
+      if (alertBox) {
+        alertBox.className = 'p-3 rounded-lg font-mono text-xs bg-[#10b981]/20 border border-[#10b981] text-tertiary';
+        alertBox.textContent = `¡Agente actualizado exitosamente! Redirigiendo al dashboard...`;
+        alertBox.classList.remove('hidden');
+      }
+
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    } catch (err: any) {
+      if (alertBox) {
+        alertBox.className = 'p-3 rounded-lg font-mono text-xs bg-[#ef4444]/20 border border-[#ef4444] text-error';
+        if (err.status === 409) {
+          alertBox.textContent = `Error 409 Conflict: El slug "${payload.slug}" ya está en uso por otro agente.`;
+        } else {
+          alertBox.textContent = `Error al actualizar: ${err.message}`;
+        }
+        alertBox.classList.remove('hidden');
+      }
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">save</span><span>Guardar Cambios</span>`;
+    }
+  });
+
+  // Delete button
+  deleteBtn?.addEventListener('click', async () => {
+    if (confirm(`¿Estás seguro de eliminar este agente y todos sus fragmentos de conocimiento asociados?`)) {
+      try {
+        await apiClient.deleteAgente(agentId);
+        window.location.href = '/';
+      } catch (err: any) {
+        alert(`Error al eliminar agente: ${err.message}`);
+      }
+    }
+  });
+
+  loadAgentData();
+</script>
