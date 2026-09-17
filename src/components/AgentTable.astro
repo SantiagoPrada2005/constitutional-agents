@@ -35,8 +35,8 @@
     </div>
   </div>
 
-  <!-- Table Container -->
-  <div class="bg-[#111827] border border-[#1e293b] rounded-lg overflow-hidden shadow-sm">
+  <!-- Table Container (Desktop / Tablet) -->
+  <div class="hidden md:block bg-[#111827] border border-[#1e293b] rounded-lg overflow-hidden shadow-sm">
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
@@ -63,9 +63,19 @@
     </div>
   </div>
 
+  <!-- Cards Container (Mobile) -->
+  <div id="agents-cards" class="md:hidden flex flex-col gap-3">
+    <div class="p-6 rounded-lg bg-[#111827] border border-[#1e293b] text-center text-[#a58c7d] font-mono text-xs">
+      <div class="inline-flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-[#f38020] animate-ping"></span>
+        <span>Cargando catálogo de agentes desde Cloudflare D1...</span>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal for Managing Knowledge (List / Edit / Ingest) -->
-  <div id="ingest-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-[#111827] border border-[#334155] rounded-xl max-w-2xl w-full max-h-[90vh] p-6 shadow-2xl flex flex-col gap-4 overflow-hidden">
+  <div id="ingest-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-[#111827] border border-[#334155] rounded-xl max-w-2xl w-full max-h-[96vh] sm:max-h-[90vh] p-4 sm:p-6 shadow-2xl flex flex-col gap-3 sm:gap-4 overflow-hidden">
       <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-[#1e293b] pb-3 shrink-0">
         <div class="flex items-center gap-2">
@@ -260,12 +270,14 @@
 
 <script>
   import { apiClient } from '../services/client/apiClient';
+  import type { AgentWithSkills, DocumentChunk } from '../types';
 
-  let agentsList: any[] = [];
-  let currentChunks: any[] = [];
+  let agentsList: AgentWithSkills[] = [];
+  let currentChunks: DocumentChunk[] = [];
   let selectedAgentId: number | null = null;
 
   const tbody = document.getElementById('agents-tbody');
+  const cardsContainer = document.getElementById('agents-cards');
   const searchInput = document.getElementById('search-agent-input') as HTMLInputElement;
   const refreshBtn = document.getElementById('refresh-agents-btn');
   const ingestModal = document.getElementById('ingest-modal');
@@ -335,121 +347,241 @@
   };
 
   async function loadAgents() {
-    if (!tbody) return;
-    try {
+    if (tbody) {
       tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-[#a58c7d] font-mono text-xs">Cargando agentes desde Cloudflare D1...</td></tr>`;
+    }
+    if (cardsContainer) {
+      cardsContainer.innerHTML = `
+        <div class="p-6 rounded-lg bg-[#111827] border border-[#1e293b] text-center text-[#a58c7d] font-mono text-xs">
+          <div class="inline-flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#f38020] animate-ping"></span>
+            <span>Cargando catálogo de agentes desde Cloudflare D1...</span>
+          </div>
+        </div>
+      `;
+    }
+    try {
       agentsList = await apiClient.getAgentes();
       renderAgents(agentsList);
-    } catch (err: any) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6" class="py-6 text-center text-error font-mono text-xs">
-            Error al consultar agentes: ${err.message}
-          </td>
-        </tr>
-      `;
-    }
-  }
-
-  function renderAgents(list: any[]) {
-    if (!tbody) return;
-    if (list.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6" class="py-12 text-center text-[#a58c7d]">
-            <div class="flex flex-col items-center justify-center gap-2">
-              <span class="material-symbols-outlined text-4xl text-[#334155]">smart_toy</span>
-              <p class="font-medium text-on-surface">No hay agentes registrados en la base de datos</p>
-              <a href="/nuevo" class="mt-2 text-xs font-mono text-[#f38020] hover:underline">
-                + Crear el primer agente constitucional
-              </a>
-            </div>
-          </td>
-        </tr>
-      `;
-      return;
-    }
-
-    tbody.innerHTML = list
-      .map((a) => {
-        const skillsArray = a.habilidades ? a.habilidades.split(',').filter(Boolean) : [];
-        const skillsChips = skillsArray
-          .map(
-            (s: string) =>
-              `<span class="px-1.5 py-0.5 rounded bg-[#181c24] border border-[#334155] text-[10px] font-mono text-[#4cd7f6]">${s}</span>`
-          )
-          .join(' ');
-
-        return `
-          <tr class="hover:bg-[#181c24]/50 transition-colors">
-            <td class="py-3 px-4">
-              <div class="flex flex-col">
-                <span class="font-semibold text-on-surface flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full ${a.activo ? 'bg-tertiary' : 'bg-[#64748b]'}"></span>
-                  ${a.nombre}
-                </span>
-                <span class="font-mono text-xs text-primary">${a.slug}</span>
-              </div>
-            </td>
-            <td class="py-3 px-4">
-              <span class="text-xs text-on-surface-variant">${a.rol}</span>
-            </td>
-            <td class="py-3 px-4">
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[11px] text-secondary">${a.modelo || 'Llama 3.1 8B'}</span>
-                <span class="font-mono text-[10px] text-[#a58c7d]">Temp: ${a.temperatura ?? 0.2}</span>
-              </div>
-            </td>
-            <td class="py-3 px-4">
-              <div class="flex flex-wrap gap-1 max-w-xs">
-                ${skillsChips || '<span class="text-xs text-[#64748b] font-mono">Sin habilidades</span>'}
-              </div>
-            </td>
-            <td class="py-3 px-4">
-              <div class="flex items-center gap-1.5 font-mono text-xs">
-                <span class="material-symbols-outlined text-[16px] text-tertiary">article</span>
-                <span class="text-on-surface font-semibold">${a.documentosCount ?? 0}</span>
-                <button
-                  class="ml-1 text-[11px] text-[#06b6d4] hover:underline open-knowledge-btn"
-                  data-agent-id="${a.id}"
-                  data-agent-name="${a.nombre}"
-                  data-agent-slug="${a.slug}"
-                  title="Gestionar fragmentos de conocimiento"
-                >
-                  Gestionar
-                </button>
-              </div>
-            </td>
-            <td class="py-3 px-4 text-right">
-              <div class="inline-flex items-center gap-1.5">
-                <a
-                  href="/editar/${a.id}"
-                  class="p-1.5 rounded bg-[#1e293b] hover:bg-[#334155] text-[#f38020] transition-colors inline-flex items-center"
-                  title="Modificar parámetros del agente"
-                >
-                  <span class="material-symbols-outlined text-[18px]">edit</span>
-                </a>
-                <a
-                  href="/chat/${a.id}"
-                  class="p-1.5 rounded bg-[#1e293b] hover:bg-[#334155] text-primary transition-colors inline-flex items-center"
-                  title="Consultar RAG"
-                >
-                  <span class="material-symbols-outlined text-[18px]">chat</span>
-                </a>
-                <button
-                  class="p-1.5 rounded bg-[#1e293b] hover:bg-[#93000a] text-error transition-colors delete-agent-btn inline-flex items-center"
-                  data-agent-id="${a.id}"
-                  data-agent-name="${a.nombre}"
-                  title="Eliminar agente"
-                >
-                  <span class="material-symbols-outlined text-[18px]">delete</span>
-                </button>
-              </div>
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-6 text-center text-error font-mono text-xs">
+              Error al consultar agentes: ${message}
             </td>
           </tr>
         `;
-      })
-      .join('');
+      }
+      if (cardsContainer) {
+        cardsContainer.innerHTML = `
+          <div class="p-6 rounded-lg bg-[#111827] border border-[#1e293b] text-center text-error font-mono text-xs">
+            Error al consultar agentes: ${message}
+          </div>
+        `;
+      }
+    }
+  }
+
+  function renderAgents(list: AgentWithSkills[]) {
+    if (!tbody && !cardsContainer) return;
+
+    if (list.length === 0) {
+      const emptyHtml = `
+        <div class="flex flex-col items-center justify-center gap-2 text-center p-8">
+          <span class="material-symbols-outlined text-4xl text-[#334155]">smart_toy</span>
+          <p class="font-medium text-on-surface">No hay agentes registrados en la base de datos</p>
+          <a href="/nuevo" class="mt-2 text-xs font-mono text-[#f38020] hover:underline">
+            + Crear el primer agente constitucional
+          </a>
+        </div>
+      `;
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-[#a58c7d]">
+              ${emptyHtml}
+            </td>
+          </tr>
+        `;
+      }
+      if (cardsContainer) {
+        cardsContainer.innerHTML = `
+          <div class="bg-[#111827] border border-[#1e293b] rounded-xl">
+            ${emptyHtml}
+          </div>
+        `;
+      }
+      return;
+    }
+
+    if (tbody) {
+      tbody.innerHTML = list
+        .map((a) => {
+          const skillsArray = a.habilidades ? a.habilidades.split(',').filter(Boolean) : [];
+          const skillsChips = skillsArray
+            .map(
+              (s: string) =>
+                `<span class="px-1.5 py-0.5 rounded bg-[#181c24] border border-[#334155] text-[10px] font-mono text-[#4cd7f6]">${s}</span>`
+            )
+            .join(' ');
+
+          return `
+            <tr class="hover:bg-[#181c24]/50 transition-colors">
+              <td class="py-3 px-4">
+                <div class="flex flex-col">
+                  <span class="font-semibold text-on-surface flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full ${a.activo ? 'bg-tertiary' : 'bg-[#64748b]'}"></span>
+                    ${a.nombre}
+                  </span>
+                  <span class="font-mono text-xs text-primary">${a.slug}</span>
+                </div>
+              </td>
+              <td class="py-3 px-4">
+                <span class="text-xs text-on-surface-variant">${a.rol}</span>
+              </td>
+              <td class="py-3 px-4">
+                <div class="flex flex-col gap-0.5">
+                  <span class="font-mono text-[11px] text-secondary">${a.modelo || 'Llama 3.1 8B'}</span>
+                  <span class="font-mono text-[10px] text-[#a58c7d]">Temp: ${a.temperatura ?? 0.2}</span>
+                </div>
+              </td>
+              <td class="py-3 px-4">
+                <div class="flex flex-wrap gap-1 max-w-xs">
+                  ${skillsChips || '<span class="text-xs text-[#64748b] font-mono">Sin habilidades</span>'}
+                </div>
+              </td>
+              <td class="py-3 px-4">
+                <div class="flex items-center gap-1.5 font-mono text-xs">
+                  <span class="material-symbols-outlined text-[16px] text-tertiary">article</span>
+                  <span class="text-on-surface font-semibold">${a.documentosCount ?? 0}</span>
+                  <button
+                    class="ml-1 text-[11px] text-[#06b6d4] hover:underline open-knowledge-btn"
+                    data-agent-id="${a.id}"
+                    data-agent-name="${a.nombre}"
+                    data-agent-slug="${a.slug}"
+                    title="Gestionar fragmentos de conocimiento"
+                  >
+                    Gestionar
+                  </button>
+                </div>
+              </td>
+              <td class="py-3 px-4 text-right">
+                <div class="inline-flex items-center gap-1.5">
+                  <a
+                    href="/editar/${a.id}"
+                    class="p-1.5 rounded bg-[#1e293b] hover:bg-[#334155] text-[#f38020] transition-colors inline-flex items-center"
+                    title="Modificar parámetros del agente"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                  </a>
+                  <a
+                    href="/chat/${a.id}"
+                    class="p-1.5 rounded bg-[#1e293b] hover:bg-[#334155] text-primary transition-colors inline-flex items-center"
+                    title="Consultar RAG"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">chat</span>
+                  </a>
+                  <button
+                    class="p-1.5 rounded bg-[#1e293b] hover:bg-[#93000a] text-error transition-colors delete-agent-btn inline-flex items-center"
+                    data-agent-id="${a.id}"
+                    data-agent-name="${a.nombre}"
+                    title="Eliminar agente"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+
+    if (cardsContainer) {
+      cardsContainer.innerHTML = list
+        .map((a) => {
+          const skillsArray = a.habilidades ? a.habilidades.split(',').filter(Boolean) : [];
+          const skillsChips = skillsArray
+            .map(
+              (s: string) =>
+                `<span class="px-2 py-0.5 rounded bg-[#181c24] border border-[#334155] text-[10px] font-mono text-[#4cd7f6]">${s}</span>`
+            )
+            .join(' ');
+
+          return `
+            <div class="bg-[#111827] border border-[#1e293b] rounded-xl p-4 flex flex-col gap-3 shadow-sm">
+              <div class="flex items-start justify-between gap-2 border-b border-[#1e293b] pb-2.5">
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-1.5 font-semibold text-on-surface text-sm">
+                    <span class="w-2.5 h-2.5 rounded-full ${a.activo ? 'bg-tertiary' : 'bg-[#64748b]'}"></span>
+                    <span>${a.nombre}</span>
+                  </div>
+                  <span class="font-mono text-xs text-primary mt-0.5">${a.slug}</span>
+                </div>
+                <div class="flex flex-col items-end gap-0.5">
+                  <span class="px-2 py-0.5 rounded bg-[#0b0f17] border border-[#1e293b] text-[10px] font-mono text-secondary">
+                    ${a.modelo || 'Llama 3.1 8B'}
+                  </span>
+                  <span class="font-mono text-[10px] text-[#a58c7d]">Temp: ${a.temperatura ?? 0.2}</span>
+                </div>
+              </div>
+
+              <p class="text-xs text-on-surface-variant font-medium leading-snug">${a.rol}</p>
+
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-[#1e293b]/60">
+                <div class="flex items-center gap-1.5 font-mono text-xs">
+                  <span class="material-symbols-outlined text-[16px] text-tertiary">article</span>
+                  <span class="text-on-surface font-semibold">${a.documentosCount ?? 0} docs</span>
+                  <button
+                    class="ml-1 text-[11px] text-[#06b6d4] hover:underline open-knowledge-btn font-mono"
+                    data-agent-id="${a.id}"
+                    data-agent-name="${a.nombre}"
+                    data-agent-slug="${a.slug}"
+                  >
+                    Gestionar
+                  </button>
+                </div>
+
+                <div class="flex flex-wrap gap-1">
+                  ${skillsChips || '<span class="text-[10px] text-[#64748b] font-mono">Sin habilidades</span>'}
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 pt-2 border-t border-[#1e293b]">
+                <a
+                  href="/chat/${a.id}"
+                  class="flex-1 py-2 px-3 bg-[#f38020] hover:bg-[#fb923c] text-[#0b0f17] font-semibold text-xs font-mono rounded-lg transition-colors flex items-center justify-center gap-1.5 min-h-[44px] shadow-[0_0_10px_rgba(243,128,32,0.2)]"
+                >
+                  <span class="material-symbols-outlined text-[18px]">chat</span>
+                  <span>Consola RAG</span>
+                </a>
+
+                <a
+                  href="/editar/${a.id}"
+                  class="p-2 min-w-11 min-h-11 rounded-lg bg-[#1e293b] hover:bg-[#334155] text-[#f38020] transition-colors flex items-center justify-center"
+                  title="Modificar parámetros del agente"
+                  aria-label="Editar agente ${a.nombre}"
+                >
+                  <span class="material-symbols-outlined text-[20px]">edit</span>
+                </a>
+
+                <button
+                  class="p-2 min-w-11 min-h-11 rounded-lg bg-[#1e293b] hover:bg-[#93000a] text-error transition-colors delete-agent-btn flex items-center justify-center"
+                  data-agent-id="${a.id}"
+                  data-agent-name="${a.nombre}"
+                  title="Eliminar agente"
+                  aria-label="Eliminar agente ${a.nombre}"
+                >
+                  <span class="material-symbols-outlined text-[20px]">delete</span>
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
 
     // Attach row events
     document.querySelectorAll('.delete-agent-btn').forEach((btn) => {
@@ -461,8 +593,9 @@
           try {
             await apiClient.deleteAgente(id);
             await loadAgents();
-          } catch (err: any) {
-            alert(`Error al eliminar: ${err.message}`);
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Error desconocido al eliminar';
+            alert(`Error al eliminar: ${message}`);
           }
         }
       });
@@ -521,12 +654,13 @@
       currentChunks = res.data || [];
       if (chunksBadge) chunksBadge.textContent = String(currentChunks.length);
       renderChunks(currentChunks);
-    } catch (err: any) {
-      chunksListContainer.innerHTML = `<div class="p-3 bg-[#ef4444]/10 border border-[#ef4444] rounded text-error font-mono text-xs text-center">Error al cargar fragmentos: ${err.message}</div>`;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido al cargar fragmentos';
+      chunksListContainer.innerHTML = `<div class="p-3 bg-[#ef4444]/10 border border-[#ef4444] rounded text-error font-mono text-xs text-center">Error al cargar fragmentos: ${message}</div>`;
     }
   }
 
-  function renderChunks(chunks: any[]) {
+  function renderChunks(chunks: DocumentChunk[]) {
     if (!chunksListContainer) return;
     if (chunks.length === 0) {
       chunksListContainer.innerHTML = `
@@ -616,15 +750,16 @@
             await apiClient.deleteConocimiento(selectedAgentId, id);
             await loadChunksForAgent(selectedAgentId);
             await loadAgents(); // update count in table
-          } catch (err: any) {
-            alert(`Error al eliminar fragmento: ${err.message}`);
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Error desconocido al eliminar fragmento';
+            alert(`Error al eliminar fragmento: ${message}`);
           }
         }
       });
     });
   }
 
-  function openChunkEditor(chunk: any) {
+  function openChunkEditor(chunk: DocumentChunk) {
     if (!inlineEditor) return;
     if (editingChunkId) editingChunkId.textContent = String(chunk.id);
     if (editChunkTitle) editChunkTitle.value = chunk.tituloSeccion || '';
@@ -665,8 +800,9 @@
 
       if (inlineEditor) inlineEditor.classList.add('hidden');
       await loadChunksForAgent(selectedAgentId);
-    } catch (err: any) {
-      alert(`Error al guardar cambios: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido al guardar cambios';
+      alert(`Error al guardar cambios: ${message}`);
     } finally {
       saveChunkBtn.disabled = false;
       saveChunkBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">save</span><span>Guardar Cambios</span>`;
@@ -751,10 +887,11 @@
         await loadAgents();
         switchTab('chunks');
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido al indexar';
       if (ingestFeedback) {
         ingestFeedback.className = 'p-2.5 rounded font-mono text-xs bg-[#ef4444]/20 border border-[#ef4444] text-error';
-        ingestFeedback.textContent = `Error: ${err.message}`;
+        ingestFeedback.textContent = `Error: ${message}`;
         ingestFeedback.classList.remove('hidden');
       }
     } finally {

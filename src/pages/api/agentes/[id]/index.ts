@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { z } from 'zod';
 import { createDb } from '../../../../db';
 import { AgentRepository } from '../../../../repositories/agent.repository';
 import { AgentService, ConflictError, NotFoundError } from '../../../../services/agent.service';
@@ -36,14 +37,15 @@ export const GET: APIRoute = async ({ params, locals }) => {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       return new Response(JSON.stringify({ success: false, message: error.message }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+    const message = error instanceof Error ? error.message : 'Error interno al consultar agente';
+    return new Response(JSON.stringify({ success: false, error: message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -68,7 +70,7 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     });
   }
 
-  let body: any;
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
@@ -84,7 +86,7 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       JSON.stringify({
         success: false,
         message: 'Validación de actualización fallida',
-        errors: validation.error.flatten().fieldErrors
+        errors: z.flattenError(validation.error).fieldErrors
       }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
@@ -105,20 +107,21 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       return new Response(JSON.stringify({ success: false, message: error.message }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    if (error instanceof ConflictError || error.message?.includes('UNIQUE')) {
-      return new Response(JSON.stringify({ success: false, message: error.message }), {
+    const message = error instanceof Error ? error.message : 'Error al actualizar agente';
+    if (error instanceof ConflictError || (error instanceof Error && error.message.includes('UNIQUE'))) {
+      return new Response(JSON.stringify({ success: false, message: message }), {
         status: 409,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+    return new Response(JSON.stringify({ success: false, error: message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -157,14 +160,15 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error instanceof NotFoundError) {
       return new Response(JSON.stringify({ success: false, message: error.message }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' }
       });
     }
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+    const message = error instanceof Error ? error.message : 'Error al eliminar agente';
+    return new Response(JSON.stringify({ success: false, error: message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

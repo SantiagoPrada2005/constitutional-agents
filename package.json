@@ -4,6 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "astro dev",
+    "check": "astro check",
+    "deploy": "astro check && astro build && wrangler deploy",
     "start": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",

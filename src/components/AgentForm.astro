@@ -2,18 +2,18 @@
 // AgentForm.astro - Agent Registration & Configuration Form
 ---
 
-<div class="bg-[#111827] border border-[#1e293b] rounded-xl p-6 shadow-xl max-w-3xl mx-auto">
-  <div class="flex items-center justify-between border-b border-[#1e293b] pb-4 mb-6">
+<div class="bg-[#111827] border border-[#1e293b] rounded-xl p-4 sm:p-6 shadow-xl max-w-3xl mx-auto">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-[#1e293b] pb-4 mb-6 gap-3">
     <div class="flex items-center gap-3">
-      <div class="p-2 rounded-lg bg-[#1e293b] text-primary">
+      <div class="p-2 rounded-lg bg-[#1e293b] text-primary shrink-0">
         <span class="material-symbols-outlined text-[24px]">smart_toy</span>
       </div>
       <div>
-        <h2 class="text-lg font-semibold text-on-surface">Configurar Nuevo Agente de IA</h2>
+        <h2 class="text-base sm:text-lg font-semibold text-on-surface">Configurar Nuevo Agente de IA</h2>
         <p class="text-xs text-[#a58c7d] font-mono">Registro en Cloudflare D1 y catálogo relacional de habilidades</p>
       </div>
     </div>
-    <a href="/" class="text-xs font-mono text-[#a58c7d] hover:text-white flex items-center gap-1">
+    <a href="/" class="text-xs font-mono text-[#a58c7d] hover:text-white flex items-center gap-1 min-h-[36px]">
       <span class="material-symbols-outlined text-[16px]">arrow_back</span>
       <span>Volver al Dashboard</span>
     </a>
@@ -207,17 +207,17 @@
     <div id="form-alert" class="hidden p-3 rounded-lg font-mono text-xs"></div>
 
     <!-- Action Buttons -->
-    <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#1e293b]">
+    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-[#1e293b]">
       <a
         href="/"
-        class="px-4 py-2 rounded-lg border border-[#334155] text-xs font-mono text-on-surface hover:bg-[#1e293b] transition-colors"
+        class="px-4 py-2.5 rounded-lg border border-[#334155] text-xs font-mono text-on-surface hover:bg-[#1e293b] transition-colors flex items-center justify-center min-h-[44px]"
       >
         Cancelar
       </a>
       <button
         type="submit"
         id="submit-agent-btn"
-        class="flex items-center gap-2 px-5 py-2 rounded-lg bg-[#f38020] hover:bg-[#fb923c] text-[#0b0f17] font-semibold text-xs font-mono transition-colors shadow-[0_0_12px_rgba(243,128,32,0.3)]"
+        class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#f38020] hover:bg-[#fb923c] text-[#0b0f17] font-semibold text-xs font-mono transition-colors shadow-[0_0_12px_rgba(243,128,32,0.3)] min-h-[44px]"
       >
         <span class="material-symbols-outlined text-[18px]">save</span>
         <span>Registrar Agente</span>
@@ -227,7 +227,7 @@
 </div>
 
 <script>
-  import { apiClient } from '../services/client/apiClient';
+  import { apiClient, ApiError } from '../services/client/apiClient';
 
   const form = document.getElementById('agent-form') as HTMLFormElement;
   const nameInput = document.getElementById('agent-name') as HTMLInputElement;
@@ -297,15 +297,20 @@
       setTimeout(() => {
         window.location.href = '/';
       }, 1000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (alertBox) {
         alertBox.className = 'p-3 rounded-lg font-mono text-xs bg-[#ef4444]/20 border border-[#ef4444] text-error';
-        if (err.status === 409) {
-          alertBox.textContent = `Error 409 Conflict: El slug "${payload.slug}" ya está registrado. Por favor elija un identificador único.`;
-        } else if (err.status === 400) {
-          alertBox.textContent = `Error 400 Bad Request: ${err.message}`;
+        if (err instanceof ApiError) {
+          if (err.status === 409) {
+            alertBox.textContent = `Error 409 Conflict: El slug "${payload.slug}" ya está registrado. Por favor elija un identificador único.`;
+          } else if (err.status === 400) {
+            alertBox.textContent = `Error 400 Bad Request: ${err.message}`;
+          } else {
+            alertBox.textContent = `Error (${err.status || '500'}): ${err.message}`;
+          }
         } else {
-          alertBox.textContent = `Error (${err.status || '500'}): ${err.message}`;
+          const message = err instanceof Error ? err.message : 'Error desconocido al registrar agente';
+          alertBox.textContent = `Error: ${message}`;
         }
         alertBox.classList.remove('hidden');
       }

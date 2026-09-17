@@ -23,8 +23,9 @@ export const GET: APIRoute = async ({ locals }) => {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error al consultar habilidades';
+    return new Response(JSON.stringify({ success: false, error: message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });

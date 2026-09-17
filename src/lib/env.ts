@@ -1,5 +1,11 @@
 import { env as cfEnv } from 'cloudflare:workers';
 
-export function getBindings(locals?: any) {
-  return cfEnv || (locals as any)?.runtime?.env;
+export type CloudflareBindings = {
+  DB: D1Database;
+  AI?: Ai;
+  VECTOR_INDEX?: VectorizeIndex;
+};
+
+export function getBindings(locals?: App.Locals): CloudflareBindings | undefined {
+  return cfEnv || locals?.runtime?.env;
 }

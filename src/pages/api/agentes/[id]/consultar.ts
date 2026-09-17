@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { z } from 'zod';
 import { createDb } from '../../../../db';
 import { AgentRepository } from '../../../../repositories/agent.repository';
 import { DocumentRepository } from '../../../../repositories/document.repository';
@@ -26,7 +27,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     });
   }
 
-  let body: any;
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
@@ -42,7 +43,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       JSON.stringify({
         success: false,
         message: 'Validación de consulta fallida',
-        errors: validation.error.flatten().fieldErrors
+        errors: z.flattenError(validation.error).fieldErrors
       }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
@@ -82,9 +83,19 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     }
 
     // JSON response
-    const respuestaFinal = typeof response === 'string'
-      ? response
-      : (response as any)?.response || JSON.stringify(response);
+    let respuestaFinal: string;
+    if (typeof response === 'string') {
+      respuestaFinal = response;
+    } else if (
+      typeof response === 'object' &&
+      response !== null &&
+      'response' in response &&
+      typeof (response as Record<string, unknown>)['response'] === 'string'
+    ) {
+      respuestaFinal = (response as Record<string, unknown>)['response'] as string;
+    } else {
+      respuestaFinal = JSON.stringify(response);
+    }
 
     return new Response(
       JSON.stringify({
@@ -105,9 +116,10 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
         headers: { 'Content-Type': 'application/json' }
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error en la inferencia RAG';
     return new Response(
-      JSON.stringify({ success: false, message: 'Error en la inferencia RAG', error: error.message }),
+      JSON.stringify({ success: false, message: 'Error en la inferencia RAG', error: message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

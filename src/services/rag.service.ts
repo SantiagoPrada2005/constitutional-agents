@@ -1,13 +1,8 @@
 import type { DocumentRepository } from '../repositories/document.repository';
 import type { AgentRepository } from '../repositories/agent.repository';
+import type { DocumentVectorMetadata, RetrievedChunk } from '../types';
 
-export interface RetrievedChunk {
-  titulo: string;
-  contenido: string;
-  score?: number;
-  origen: 'vectorial' | 'lexico';
-  vectorId?: string;
-}
+export type { RetrievedChunk };
 
 export class RagService {
   constructor(
@@ -15,7 +10,7 @@ export class RagService {
     private readonly agentRepo: AgentRepository,
     private readonly ai?: Ai,
     private readonly vectorIndex?: VectorizeIndex
-  ) {}
+  ) { }
 
   /**
    * Split markdown text into logical chunks by headers (## )
@@ -72,10 +67,14 @@ export class RagService {
       // 1. Generate embeddings and store in Vectorize if available
       if (this.ai && this.vectorIndex) {
         try {
-          const aiResponse: any = await this.ai.run('@cf/baai/bge-m3' as any, {
+          const aiResponse = await this.ai.run('@cf/baai/bge-m3', {
             text: [section.contenido]
           });
-          const vector = aiResponse?.data?.[0];
+          const vector = (aiResponse && 'data' in aiResponse && Array.isArray(aiResponse.data))
+            ? aiResponse.data[0]
+            : (aiResponse && 'response' in aiResponse && Array.isArray(aiResponse.response) && Array.isArray(aiResponse.response[0]))
+              ? aiResponse.response[0]
+              : undefined;
 
           if (vector && Array.isArray(vector)) {
             await this.vectorIndex.upsert([
@@ -176,10 +175,14 @@ export class RagService {
     // 2. Búsqueda Semántica con Vectorize (recuperación densa complementaria)
     if (this.ai && this.vectorIndex) {
       try {
-        const queryEmbed: any = await this.ai.run('@cf/baai/bge-m3' as any, {
+        const queryEmbed = await this.ai.run('@cf/baai/bge-m3', {
           text: [pregunta]
         });
-        const queryVector = queryEmbed?.data?.[0];
+        const queryVector = (queryEmbed && 'data' in queryEmbed && Array.isArray(queryEmbed.data))
+          ? queryEmbed.data[0]
+          : (queryEmbed && 'response' in queryEmbed && Array.isArray(queryEmbed.response) && Array.isArray(queryEmbed.response[0]))
+            ? queryEmbed.response[0]
+            : undefined;
 
         if (queryVector && Array.isArray(queryVector)) {
           const vectorMatches = await this.vectorIndex.query(queryVector, {
@@ -188,7 +191,7 @@ export class RagService {
 
           if (vectorMatches?.matches) {
             for (const match of vectorMatches.matches) {
-              const meta = match.metadata as any;
+              const meta = match.metadata as unknown as DocumentVectorMetadata | undefined;
               const matchesAgent = !meta?.agente_id || meta?.agente_id === String(agenteId);
               const matchesDomain =
                 dominios.includes('*') ||
@@ -232,7 +235,7 @@ export class RagService {
   }
 
   /**
-   * Execute augmented generation with Workers AI Llama 3.1
+   * Execute augmented generation with Workers AI Llama 4 scout
    */
   async generateAnswer(agenteId: number, pregunta: string, stream = false) {
     const agent = await this.agentRepo.findById(agenteId);
@@ -267,7 +270,7 @@ Reglas obligatorias:
           ? agent.modelo
           : '@cf/meta/llama-4-scout-17b-16e-instruct';
 
-        const response = await this.ai.run(modelName as any, {
+        const response = await (this.ai as any).run(modelName, {
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: pregunta }

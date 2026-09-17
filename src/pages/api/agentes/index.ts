@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { z } from 'zod';
 import { createDb } from '../../../db';
 import { AgentRepository } from '../../../repositories/agent.repository';
 import { AgentService, ConflictError } from '../../../services/agent.service';
@@ -29,8 +30,9 @@ export const GET: APIRoute = async ({ locals }) => {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ success: false, error: error.message }), {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error desconocido al consultar agentes';
+    return new Response(JSON.stringify({ success: false, error: message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -47,7 +49,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
   }
 
-  let body: any;
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
@@ -64,7 +66,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       JSON.stringify({
         success: false,
         message: 'Validación fallida: campos requeridos faltantes o inválidos',
-        errors: validation.error.flatten().fieldErrors
+        errors: z.flattenError(validation.error).fieldErrors
       }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
@@ -86,16 +88,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }),
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
-    if (error instanceof ConflictError || error.message?.includes('UNIQUE')) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error interno en el servidor';
+    if (error instanceof ConflictError || (error instanceof Error && error.message.includes('UNIQUE'))) {
       return new Response(
-        JSON.stringify({ success: false, message: error.message || 'El identificador (slug) ya existe' }),
+        JSON.stringify({ success: false, message: message || 'El identificador (slug) ya existe' }),
         { status: 409, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
     return new Response(
-      JSON.stringify({ success: false, message: 'Error interno en el servidor', error: error.message }),
+      JSON.stringify({ success: false, message: 'Error interno en el servidor', error: message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

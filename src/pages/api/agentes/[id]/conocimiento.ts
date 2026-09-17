@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { z } from 'zod';
 import { createDb } from '../../../../db';
 import { AgentRepository } from '../../../../repositories/agent.repository';
 import { DocumentRepository } from '../../../../repositories/document.repository';
@@ -60,9 +61,10 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error al consultar conocimiento';
     return new Response(
-      JSON.stringify({ success: false, message: 'Error al consultar conocimiento', error: error.message }),
+      JSON.stringify({ success: false, message: 'Error al consultar conocimiento', error: message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -86,7 +88,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     });
   }
 
-  let body: any;
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
@@ -102,7 +104,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       JSON.stringify({
         success: false,
         message: 'Datos de documento inválidos',
-        errors: validation.error.flatten().fieldErrors
+        errors: z.flattenError(validation.error).fieldErrors
       }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
@@ -140,9 +142,10 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
       }),
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error durante la ingesta documental';
     return new Response(
-      JSON.stringify({ success: false, message: 'Error durante la ingesta documental', error: error.message }),
+      JSON.stringify({ success: false, message: 'Error durante la ingesta documental', error: message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -166,7 +169,7 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     });
   }
 
-  let body: any;
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
@@ -182,7 +185,7 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       JSON.stringify({
         success: false,
         message: 'Datos de actualización inválidos',
-        errors: validation.error.flatten().fieldErrors
+        errors: z.flattenError(validation.error).fieldErrors
       }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
@@ -219,10 +222,14 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     // Actualizar embedding en Vectorize si está disponible
     if (env.AI && env.VECTOR_INDEX && validation.data.contenido && existingDoc.vectorId) {
       try {
-        const aiResponse: any = await env.AI.run('@cf/baai/bge-m3' as any, {
+        const aiResponse = await env.AI.run('@cf/baai/bge-m3', {
           text: [validation.data.contenido]
         });
-        const vector = aiResponse?.data?.[0];
+        const vector = (aiResponse && 'data' in aiResponse && Array.isArray(aiResponse.data))
+          ? aiResponse.data[0]
+          : (aiResponse && 'response' in aiResponse && Array.isArray(aiResponse.response) && Array.isArray(aiResponse.response[0]))
+            ? aiResponse.response[0]
+            : undefined;
         if (vector && Array.isArray(vector)) {
           await env.VECTOR_INDEX.upsert([
             {
@@ -250,9 +257,10 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error al actualizar sección';
     return new Response(
-      JSON.stringify({ success: false, message: 'Error al actualizar sección', error: error.message }),
+      JSON.stringify({ success: false, message: 'Error al actualizar sección', error: message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -281,8 +289,8 @@ export const DELETE: APIRoute = async ({ params, request, locals }) => {
 
   if (isNaN(docId) || docId <= 0) {
     try {
-      const body: any = await request.json();
-      docId = Number(body?.documentoId || body?.id);
+      const body = (await request.json()) as Record<string, unknown>;
+      docId = Number(body?.['documentoId'] || body?.['id']);
     } catch {
       // Body vacío o no parseable
     }
@@ -334,9 +342,10 @@ export const DELETE: APIRoute = async ({ params, request, locals }) => {
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error al eliminar sección';
     return new Response(
-      JSON.stringify({ success: false, message: 'Error al eliminar sección', error: error.message }),
+      JSON.stringify({ success: false, message: 'Error al eliminar sección', error: message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

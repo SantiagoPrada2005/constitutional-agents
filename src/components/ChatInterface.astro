@@ -6,45 +6,66 @@ interface Props {
 const { agentId } = Astro.props;
 ---
 
-<div id="chat-root" data-agent-id={agentId} class="flex flex-col h-[calc(100vh-8.5rem)] gap-4">
+<div id="chat-root" data-agent-id={agentId} class="flex flex-col h-[calc(100dvh-7.5rem)] sm:h-[calc(100dvh-8rem)] gap-3 sm:gap-4">
   <!-- Agent Summary Card Header -->
-  <div class="bg-[#111827] border border-[#1e293b] rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-[#1e293b] border border-[#334155] flex items-center justify-center text-primary font-mono font-bold text-sm">
+  <div class="bg-[#111827] border border-[#1e293b] rounded-xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
+    <div class="flex items-center gap-2.5 sm:gap-3">
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#1e293b] border border-[#334155] flex items-center justify-center text-primary font-mono font-bold text-xs sm:text-sm shrink-0">
         AI
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h2 id="agent-header-name" class="font-semibold text-on-surface text-base">Cargando agente...</h2>
+          <h2 id="agent-header-name" class="font-semibold text-on-surface text-sm sm:text-base truncate max-w-[200px] sm:max-w-none">Cargando agente...</h2>
           <span id="agent-active-badge" class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-tertiary/10 text-tertiary font-semibold">ONLINE</span>
         </div>
-        <p id="agent-header-role" class="text-xs text-[#a58c7d] font-mono">Consultando D1...</p>
+        <p id="agent-header-role" class="text-[11px] sm:text-xs text-[#a58c7d] font-mono truncate max-w-[250px] sm:max-w-none">Consultando D1...</p>
       </div>
     </div>
 
     <!-- Telemetry Pills -->
-    <div class="flex items-center gap-2 font-mono text-xs">
-      <div class="px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5">
+    <div class="flex items-center gap-1.5 sm:gap-2 font-mono text-[11px] sm:text-xs overflow-x-auto max-w-full pb-0.5">
+      <div class="px-2 sm:px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5 shrink-0">
         <span class="text-[#a58c7d]">MODEL:</span>
-        <span id="agent-header-model" class="text-secondary font-medium">@cf/meta/llama-4-scout-17b-16e-instruct</span>
+        <span id="agent-header-model" class="text-secondary font-medium truncate max-w-[120px] sm:max-w-none">Llama 3.1</span>
       </div>
-      <div class="px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5">
+      <div class="px-2 sm:px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5 shrink-0">
         <span class="text-[#a58c7d]">TEMP:</span>
         <span id="agent-header-temp" class="text-tertiary">0.2</span>
       </div>
-      <div class="px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5">
+      <div class="px-2 sm:px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5 shrink-0">
         <span class="text-[#a58c7d]">CHUNKS:</span>
         <span id="agent-header-docs" class="text-primary">0</span>
       </div>
     </div>
   </div>
 
+  <!-- Mobile Tab Switcher (< lg) -->
+  <div class="flex lg:hidden items-center bg-[#111827] p-1 rounded-xl border border-[#1e293b] shrink-0 font-mono text-xs">
+    <button
+      id="mobile-tab-chat"
+      type="button"
+      class="flex-1 py-2 px-3 rounded-lg bg-[#f38020] text-[#0b0f17] font-semibold flex items-center justify-center gap-2 transition-all min-h-[40px]"
+    >
+      <span class="material-symbols-outlined text-[18px]">terminal</span>
+      <span>Terminal de Chat</span>
+    </button>
+    <button
+      id="mobile-tab-citations"
+      type="button"
+      class="flex-1 py-2 px-3 rounded-lg text-[#a58c7d] hover:text-white flex items-center justify-center gap-2 transition-all min-h-[40px]"
+    >
+      <span class="material-symbols-outlined text-[18px]">fact_check</span>
+      <span>Citas RAG</span>
+      <span id="mobile-citation-badge" class="px-1.5 py-0.5 rounded-full bg-[#1e293b] text-[10px] text-tertiary font-bold">0</span>
+    </button>
+  </div>
+
   <!-- Chat & Citations Main Split Grid -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 flex-1 min-h-0">
     <!-- Messages Terminal (Left 2 cols) -->
-    <div class="lg:col-span-2 bg-[#0b0f17] border border-[#1e293b] rounded-xl flex flex-col overflow-hidden">
+    <div id="panel-chat-terminal" class="lg:col-span-2 bg-[#0b0f17] border border-[#1e293b] rounded-xl flex flex-col overflow-hidden h-full">
       <!-- Chat Messages Scrollable Log -->
-      <div id="chat-messages" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 font-mono text-xs">
+      <div id="chat-messages" class="flex-1 p-3 sm:p-4 overflow-y-auto flex flex-col gap-3 font-mono text-xs">
         <div class="p-3 rounded-lg bg-[#111827] border border-[#1e293b] text-[#cbd5e1] leading-relaxed">
           <div class="flex items-center gap-2 text-primary mb-1">
             <span class="material-symbols-outlined text-[16px]">terminal</span>
@@ -55,42 +76,42 @@ const { agentId } = Astro.props;
       </div>
 
       <!-- Quick Question Suggestions -->
-      <div class="px-3 py-2 border-t border-[#1e293b] bg-[#111827]/50 flex items-center gap-2 overflow-x-auto whitespace-nowrap font-mono text-[11px]">
-        <span class="text-[#a58c7d]">Sugerencias:</span>
-        <button class="quick-prompt-btn px-2 py-1 rounded bg-[#181c24] hover:bg-[#1e293b] text-secondary border border-[#334155] transition-colors" data-prompt="¿Qué dice el Artículo 11 sobre el derecho a la vida?">
-          Art. 11 (Derecho a la vida)
+      <div class="px-3 py-2 border-t border-[#1e293b] bg-[#111827]/50 flex items-center gap-2 overflow-x-auto whitespace-nowrap font-mono text-[11px] shrink-0">
+        <span class="text-[#a58c7d] text-[10px]">Sugerencias:</span>
+        <button type="button" class="quick-prompt-btn px-2.5 py-1.5 rounded-full bg-[#181c24] hover:bg-[#1e293b] text-secondary border border-[#334155] transition-colors min-h-[32px] flex items-center" data-prompt="¿Qué dice el Artículo 11 sobre el derecho a la vida?">
+          Art. 11 (Vida)
         </button>
-        <button class="quick-prompt-btn px-2 py-1 rounded bg-[#181c24] hover:bg-[#1e293b] text-secondary border border-[#334155] transition-colors" data-prompt="¿Cómo funciona la Acción de Tutela según el Artículo 86?">
-          Art. 86 (Acción de Tutela)
+        <button type="button" class="quick-prompt-btn px-2.5 py-1.5 rounded-full bg-[#181c24] hover:bg-[#1e293b] text-secondary border border-[#334155] transition-colors min-h-[32px] flex items-center" data-prompt="¿Cómo funciona la Acción de Tutela según el Artículo 86?">
+          Art. 86 (Tutela)
         </button>
-        <button class="quick-prompt-btn px-2 py-1 rounded bg-[#181c24] hover:bg-[#1e293b] text-secondary border border-[#334155] transition-colors" data-prompt="¿Cuáles son los fines esenciales del Estado en el Artículo 2?">
+        <button type="button" class="quick-prompt-btn px-2.5 py-1.5 rounded-full bg-[#181c24] hover:bg-[#1e293b] text-secondary border border-[#334155] transition-colors min-h-[32px] flex items-center" data-prompt="¿Cuáles son los fines esenciales del Estado en el Artículo 2?">
           Art. 2 (Fines del Estado)
         </button>
       </div>
 
       <!-- Input Bar -->
-      <form id="chat-form" class="p-3 bg-[#111827] border-t border-[#1e293b] flex items-center gap-2">
+      <form id="chat-form" class="p-2.5 sm:p-3 bg-[#111827] border-t border-[#1e293b] flex items-center gap-2 shrink-0">
         <input
           type="text"
           id="chat-input"
-          placeholder="Consultar artículo, derecho fundamental o principio..."
+          placeholder="Consultar artículo o derecho..."
           required
-          class="flex-1 bg-[#0b0f17] border border-[#1e293b] rounded-lg px-3 py-2.5 text-xs font-mono text-on-surface placeholder-[#64748b] focus:outline-none focus:border-primary transition-colors"
+          class="flex-1 bg-[#0b0f17] border border-[#1e293b] rounded-lg px-3 py-2.5 text-[16px] sm:text-xs font-mono text-on-surface placeholder-[#64748b] focus:outline-none focus:border-primary transition-colors min-h-[44px]"
         />
         <button
           type="submit"
           id="chat-send-btn"
-          class="flex items-center gap-1.5 px-4 py-2.5 bg-[#f38020] hover:bg-[#fb923c] text-[#0b0f17] font-semibold text-xs font-mono rounded-lg transition-colors shadow-[0_0_10px_rgba(243,128,32,0.3)] disabled:opacity-50"
+          class="flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2.5 bg-[#f38020] hover:bg-[#fb923c] text-[#0b0f17] font-semibold text-xs font-mono rounded-lg transition-colors shadow-[0_0_10px_rgba(243,128,32,0.3)] disabled:opacity-50 min-h-[44px] shrink-0"
         >
-          <span class="material-symbols-outlined text-[16px]">send</span>
-          <span>Consultar</span>
+          <span class="material-symbols-outlined text-[18px]">send</span>
+          <span class="hidden xs:inline">Consultar</span>
         </button>
       </form>
     </div>
 
     <!-- Citations & Grounding Context Inspector (Right 1 col) -->
-    <div class="bg-[#111827] border border-[#1e293b] rounded-xl flex flex-col overflow-hidden">
-      <div class="p-3 border-b border-[#1e293b] flex items-center justify-between">
+    <div id="panel-citations-inspector" class="hidden lg:flex bg-[#111827] border border-[#1e293b] rounded-xl flex-col overflow-hidden h-full">
+      <div class="p-3 border-b border-[#1e293b] flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2 text-on-surface font-semibold text-xs">
           <span class="material-symbols-outlined text-[16px] text-tertiary">fact_check</span>
           <span>Citas y Fundamentación RAG</span>
@@ -110,6 +131,7 @@ const { agentId } = Astro.props;
 
 <script>
   import { apiClient } from '../services/client/apiClient';
+  import type { RetrievedChunk } from '../types';
 
   const root = document.getElementById('chat-root');
   const agentId = Number(root?.dataset.agentId);
@@ -127,6 +149,36 @@ const { agentId } = Astro.props;
   const citationsList = document.getElementById('citations-list');
   const citationCount = document.getElementById('citation-count');
 
+  // Mobile Tabs Elements
+  const tabChat = document.getElementById('mobile-tab-chat');
+  const tabCitations = document.getElementById('mobile-tab-citations');
+  const panelChat = document.getElementById('panel-chat-terminal');
+  const panelCitations = document.getElementById('panel-citations-inspector');
+  const mobileCitationBadge = document.getElementById('mobile-citation-badge');
+
+  function switchMobileTab(active: 'chat' | 'citations') {
+    if (!tabChat || !tabCitations || !panelChat || !panelCitations) return;
+
+    if (active === 'chat') {
+      tabChat.className = 'flex-1 py-2 px-3 rounded-lg bg-[#f38020] text-[#0b0f17] font-semibold flex items-center justify-center gap-2 transition-all min-h-[40px]';
+      tabCitations.className = 'flex-1 py-2 px-3 rounded-lg text-[#a58c7d] hover:text-white flex items-center justify-center gap-2 transition-all min-h-[40px]';
+      panelChat.classList.remove('hidden');
+      panelChat.classList.add('flex');
+      panelCitations.classList.add('hidden');
+      panelCitations.classList.remove('flex');
+    } else {
+      tabCitations.className = 'flex-1 py-2 px-3 rounded-lg bg-[#f38020] text-[#0b0f17] font-semibold flex items-center justify-center gap-2 transition-all min-h-[40px]';
+      tabChat.className = 'flex-1 py-2 px-3 rounded-lg text-[#a58c7d] hover:text-white flex items-center justify-center gap-2 transition-all min-h-[40px]';
+      panelChat.classList.add('hidden');
+      panelChat.classList.remove('flex');
+      panelCitations.classList.remove('hidden');
+      panelCitations.classList.add('flex');
+    }
+  }
+
+  tabChat?.addEventListener('click', () => switchMobileTab('chat'));
+  tabCitations?.addEventListener('click', () => switchMobileTab('citations'));
+
   async function loadAgentDetails() {
     try {
       const agent = await apiClient.getAgente(agentId);
@@ -135,8 +187,9 @@ const { agentId } = Astro.props;
       if (headerModel) headerModel.textContent = agent.modelo;
       if (headerTemp) headerTemp.textContent = String(agent.temperatura ?? 0.2);
       if (headerDocs) headerDocs.textContent = String(agent.documentosCount ?? 0);
-    } catch (err: any) {
-      if (headerName) headerName.textContent = `Error: ${err.message}`;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error al cargar detalles del agente';
+      if (headerName) headerName.textContent = `Error: ${message}`;
     }
   }
 
@@ -175,9 +228,18 @@ const { agentId } = Astro.props;
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  function renderCitations(citations: any[]) {
+  function renderCitations(citations: RetrievedChunk[]) {
     if (!citationsList || !citationCount) return;
     citationCount.textContent = `${citations.length} citas`;
+
+    if (mobileCitationBadge) {
+      mobileCitationBadge.textContent = String(citations.length);
+      if (citations.length > 0) {
+        mobileCitationBadge.className = 'px-1.5 py-0.5 rounded-full bg-tertiary/20 text-[10px] text-tertiary font-bold';
+      } else {
+        mobileCitationBadge.className = 'px-1.5 py-0.5 rounded-full bg-[#1e293b] text-[10px] text-[#a58c7d] font-bold';
+      }
+    }
 
     if (citations.length === 0) {
       citationsList.innerHTML = `
@@ -222,8 +284,9 @@ const { agentId } = Astro.props;
       if (data.citas) {
         renderCitations(data.citas);
       }
-    } catch (err: any) {
-      appendAgentMessage(`Error al consultar: ${err.message}`, false);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido al consultar';
+      appendAgentMessage(`Error al consultar: ${message}`, false);
     } finally {
       sendBtn.disabled = false;
       sendBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">send</span><span>Consultar</span>`;

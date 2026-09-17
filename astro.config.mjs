@@ -12,7 +12,8 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
-      include: ['drizzle-orm', 'drizzle-orm/d1', 'zod']
+      include: [],
+      exclude: ['zod', 'drizzle-orm', 'drizzle-orm/d1']
     }
   },
 });

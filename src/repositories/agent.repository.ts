@@ -111,7 +111,10 @@ export class AgentRepository {
             habilidadId: s.id
           }).onConflictDoNothing()
         );
-        await this.db.batch(batchInserts as [any, ...any[]]);
+        const [first, ...rest] = batchInserts;
+        if (first) {
+          await this.db.batch([first, ...rest]);
+        }
       }
     }
 
@@ -119,14 +122,14 @@ export class AgentRepository {
   }
 
   async update(id: number, data: UpdateAgentInput, skillCodes?: string[]) {
-    const updatePayload: Record<string, any> = {};
-    if (data.slug !== undefined) updatePayload['slug'] = data.slug;
-    if (data.nombre !== undefined) updatePayload['nombre'] = data.nombre;
-    if (data.rol !== undefined) updatePayload['rol'] = data.rol;
-    if (data.modelo !== undefined) updatePayload['modelo'] = data.modelo;
-    if (data.temperatura !== undefined) updatePayload['temperatura'] = data.temperatura;
-    if (data.systemPrompt !== undefined) updatePayload['systemPrompt'] = data.systemPrompt;
-    if (data.activo !== undefined) updatePayload['activo'] = data.activo;
+    const updatePayload: Partial<Omit<typeof schema.agentes.$inferInsert, 'id'>> = {};
+    if (data.slug !== undefined) updatePayload.slug = data.slug;
+    if (data.nombre !== undefined) updatePayload.nombre = data.nombre;
+    if (data.rol !== undefined) updatePayload.rol = data.rol;
+    if (data.modelo !== undefined) updatePayload.modelo = data.modelo;
+    if (data.temperatura !== undefined) updatePayload.temperatura = data.temperatura;
+    if (data.systemPrompt !== undefined) updatePayload.systemPrompt = data.systemPrompt;
+    if (data.activo !== undefined) updatePayload.activo = data.activo;
 
     if (Object.keys(updatePayload).length > 0) {
       await this.db
@@ -154,7 +157,10 @@ export class AgentRepository {
               habilidadId: s.id
             }).onConflictDoNothing()
           );
-          await this.db.batch(batchInserts as [any, ...any[]]);
+          const [first, ...rest] = batchInserts;
+          if (first) {
+            await this.db.batch([first, ...rest]);
+          }
         }
       }
     }

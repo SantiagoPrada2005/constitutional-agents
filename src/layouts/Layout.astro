@@ -18,8 +18,36 @@ const { title = 'Constitutional AI Agent Orchestrator', activePath = '/' } = Ast
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="preload" href="/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin />
     <style is:global>
+      @font-face {
+        font-family: 'Material Symbols Outlined';
+        font-style: normal;
+        font-weight: 100 700;
+        font-display: block;
+        src: url('/fonts/material-symbols-outlined.woff2') format('woff2');
+      }
+
+      .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined' !important;
+        font-weight: normal !important;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        font-feature-settings: 'liga' 1;
+        -webkit-font-feature-settings: 'liga' 1;
+        font-variant-ligatures: normal;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
       body {
         margin: 0;
         padding: 0;
@@ -48,17 +76,39 @@ const { title = 'Constitutional AI Agent Orchestrator', activePath = '/' } = Ast
     </style>
   </head>
   <body class="bg-background min-h-screen flex text-on-surface selection:bg-primary-container selection:text-on-primary">
-    <!-- Left Navigation Sidebar -->
-    <aside class="fixed left-0 top-0 h-full w-64 bg-[#0a0e16] border-r border-[#1e293b] z-50 flex flex-col justify-between">
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div
+      id="sidebar-backdrop"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-300 opacity-0"
+      aria-hidden="true"
+    ></div>
+
+    <!-- Left Navigation Sidebar (Responsive Drawer) -->
+    <aside
+      id="app-sidebar"
+      class="fixed left-0 top-0 h-full w-64 bg-[#0a0e16] border-r border-[#1e293b] z-50 flex flex-col justify-between transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none"
+      aria-label="Navegación principal"
+    >
       <div class="flex flex-col">
-        <!-- Brand Header -->
-        <a href="/" class="h-16 px-4 flex items-center gap-3 border-b border-[#1e293b] hover:bg-[#111827] transition-colors">
-          <img src="/logo.svg" alt="Constitutional AI Logo" class="h-8 w-8 object-contain" />
-          <div class="flex flex-col">
-            <span class="text-sm font-semibold text-on-surface tracking-tight">Lex-Edge AI</span>
-            <span class="text-[10px] font-mono text-primary font-medium tracking-wider">CONSTITUTIONAL</span>
-          </div>
-        </a>
+        <!-- Brand Header with Mobile Close Button -->
+        <div class="h-16 px-4 flex items-center justify-between border-b border-[#1e293b]">
+          <a href="/" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <img src="/logo.svg" alt="Constitutional AI Logo" class="h-8 w-8 object-contain" />
+            <div class="flex flex-col">
+              <span class="text-sm font-semibold text-on-surface tracking-tight">Lex-Edge AI</span>
+              <span class="text-[10px] font-mono text-primary font-medium tracking-wider">CONSTITUTIONAL</span>
+            </div>
+          </a>
+
+          <button
+            id="close-sidebar-btn"
+            type="button"
+            class="lg:hidden p-2 min-h-11 min-w-11 flex items-center justify-center rounded-lg text-[#a58c7d] hover:text-white hover:bg-[#181c24] transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Cerrar menú"
+          >
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
 
         <!-- Edge Status Badge -->
         <div class="mx-3 my-3 p-2 bg-[#111827] border border-[#1e293b] rounded-lg flex items-center justify-between">
@@ -70,43 +120,43 @@ const { title = 'Constitutional AI Agent Orchestrator', activePath = '/' } = Ast
         </div>
 
         <!-- Navigation Links -->
-        <nav class="px-2 py-2 flex flex-col gap-1">
+        <nav class="px-2 py-2 flex flex-col gap-1.5" id="sidebar-nav">
           <a
             href="/"
             class:list={[
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors min-h-[44px]',
               activePath === '/'
                 ? 'bg-[#f38020] text-[#0b0f17] font-semibold shadow-[0_0_12px_rgba(243,128,32,0.3)]'
                 : 'text-on-surface-variant hover:bg-[#181c24] hover:text-on-surface'
             ]}
           >
-            <span class="material-symbols-outlined text-[18px]">hub</span>
+            <span class="material-symbols-outlined text-[20px]">hub</span>
             <span>Gestión y Agentes</span>
           </a>
 
           <a
             href="/nuevo"
             class:list={[
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors min-h-[44px]',
               activePath === '/nuevo'
                 ? 'bg-[#f38020] text-[#0b0f17] font-semibold shadow-[0_0_12px_rgba(243,128,32,0.3)]'
                 : 'text-on-surface-variant hover:bg-[#181c24] hover:text-on-surface'
             ]}
           >
-            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span class="material-symbols-outlined text-[20px]">add_circle</span>
             <span>Nuevo Agente</span>
           </a>
 
           <a
             href="/chat/1"
             class:list={[
-              'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors min-h-[44px]',
               activePath.startsWith('/chat')
                 ? 'bg-[#f38020] text-[#0b0f17] font-semibold shadow-[0_0_12px_rgba(243,128,32,0.3)]'
                 : 'text-on-surface-variant hover:bg-[#181c24] hover:text-on-surface'
             ]}
           >
-            <span class="material-symbols-outlined text-[18px]">gavel</span>
+            <span class="material-symbols-outlined text-[20px]">gavel</span>
             <span>RAG Constitucional</span>
           </a>
         </nav>
@@ -133,35 +183,50 @@ const { title = 'Constitutional AI Agent Orchestrator', activePath = '/' } = Ast
     </aside>
 
     <!-- Main Workspace Area -->
-    <div class="pl-64 flex-1 flex flex-col min-h-screen">
+    <div class="pl-0 lg:pl-64 flex-1 flex flex-col min-h-screen w-full transition-[padding] duration-300">
       <!-- Top Fixed Header -->
-      <header class="h-16 bg-[#0a0e16]/90 backdrop-blur-md border-b border-[#1e293b] sticky top-0 z-40 flex items-center justify-between px-6">
-        <div class="flex items-center gap-3">
-          <div class="flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] px-3 py-1 rounded-lg font-mono text-xs">
+      <header class="h-16 bg-[#0a0e16]/95 backdrop-blur-md border-b border-[#1e293b] sticky top-0 z-30 flex items-center justify-between px-3 sm:px-6 gap-2">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Mobile Hamburger Toggle -->
+          <button
+            id="open-sidebar-btn"
+            type="button"
+            class="lg:hidden min-h-11 min-w-11 flex items-center justify-center p-2 rounded-lg text-on-surface hover:bg-[#181c24] transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label="Abrir menú de navegación"
+            aria-controls="app-sidebar"
+            aria-expanded="false"
+          >
+            <span class="material-symbols-outlined text-[24px]">menu</span>
+          </button>
+
+          <!-- Mobile Brand Indicator -->
+          <div class="flex items-center gap-2 lg:hidden">
+            <img src="/logo.svg" alt="" class="h-6 w-6 object-contain" />
+            <span class="text-xs font-semibold text-on-surface font-mono">Lex-Edge</span>
+          </div>
+
+          <div class="hidden sm:flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] px-2.5 py-1 rounded-lg font-mono text-xs">
             <span class="text-[#a58c7d]">RUNTIME:</span>
             <span class="text-[#f38020] font-semibold">Cloudflare Edge</span>
           </div>
-          <div class="flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] px-3 py-1 rounded-lg font-mono text-xs">
+          <div class="hidden md:flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] px-2.5 py-1 rounded-lg font-mono text-xs">
             <span class="text-[#a58c7d]">API:</span>
             <span class="text-secondary font-semibold">/api/agentes</span>
           </div>
-          <div class="hidden md:flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] px-3 py-1 rounded-lg font-mono text-xs">
-            <span class="text-[#a58c7d]">P95 LATENCY:</span>
-            <span class="text-tertiary font-bold">16.2ms</span>
-          </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 sm:gap-3">
           <a
             href="/nuevo"
-            class="hidden sm:inline-flex items-center gap-1.5 bg-primary-container text-on-primary px-3 py-1.5 rounded text-xs font-medium hover:bg-[#fb923c] transition-colors shadow-[0_0_12px_rgba(243,128,32,0.3)]"
+            class="inline-flex items-center gap-1.5 bg-primary-container text-on-primary px-3 py-1.5 rounded text-xs font-medium hover:bg-[#fb923c] transition-colors shadow-[0_0_12px_rgba(243,128,32,0.3)] min-h-[36px]"
           >
             <span class="material-symbols-outlined text-[16px]">add</span>
-            <span>Crear Agente</span>
+            <span class="hidden sm:inline">Crear Agente</span>
+            <span class="sm:hidden">Nuevo</span>
           </a>
 
           <div class="flex items-center gap-2 pl-2 border-l border-[#1e293b]">
-            <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-[#502400] font-bold text-xs">
+            <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-[#502400] font-bold text-xs" title="edge_admin">
               CF
             </div>
             <span class="font-mono text-xs text-on-surface hidden lg:inline">edge_admin</span>
@@ -170,9 +235,67 @@ const { title = 'Constitutional AI Agent Orchestrator', activePath = '/' } = Ast
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 p-6 max-w-7xl w-full mx-auto">
+      <main class="flex-1 p-3.5 sm:p-5 md:p-6 max-w-7xl w-full mx-auto">
         <slot />
       </main>
     </div>
+
+    <script>
+      function setupSidebar() {
+        const sidebar = document.getElementById('app-sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        const openBtn = document.getElementById('open-sidebar-btn');
+        const closeBtn = document.getElementById('close-sidebar-btn');
+
+        if (!sidebar || !backdrop || !openBtn) return;
+
+        function openSidebar() {
+          sidebar?.classList.remove('-translate-x-full');
+          backdrop?.classList.remove('hidden');
+          requestAnimationFrame(() => {
+            backdrop?.classList.remove('opacity-0');
+            backdrop?.classList.add('opacity-100');
+          });
+          openBtn?.setAttribute('aria-expanded', 'true');
+          document.body.classList.add('overflow-hidden');
+        }
+
+        function closeSidebar() {
+          sidebar?.classList.add('-translate-x-full');
+          backdrop?.classList.remove('opacity-100');
+          backdrop?.classList.add('opacity-0');
+          openBtn?.setAttribute('aria-expanded', 'false');
+          document.body.classList.remove('overflow-hidden');
+
+          setTimeout(() => {
+            if (sidebar?.classList.contains('-translate-x-full')) {
+              backdrop?.classList.add('hidden');
+            }
+          }, 300);
+        }
+
+        openBtn.addEventListener('click', openSidebar);
+        closeBtn?.addEventListener('click', closeSidebar);
+        backdrop.addEventListener('click', closeSidebar);
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) {
+            closeSidebar();
+          }
+        });
+
+        const navLinks = sidebar.querySelectorAll('nav a');
+        navLinks.forEach((link) => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth < 1024) {
+              closeSidebar();
+            }
+          });
+        });
+      }
+
+      setupSidebar();
+      document.addEventListener('astro:after-swap', setupSidebar);
+    </script>
   </body>
 </html>
