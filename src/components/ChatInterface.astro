@@ -26,7 +26,7 @@ const { agentId } = Astro.props;
     <div class="flex items-center gap-1.5 sm:gap-2 font-mono text-[11px] sm:text-xs overflow-x-auto max-w-full pb-0.5">
       <div class="px-2 sm:px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5 shrink-0">
         <span class="text-[#a58c7d]">MODEL:</span>
-        <span id="agent-header-model" class="text-secondary font-medium truncate max-w-[120px] sm:max-w-none">Llama 3.1</span>
+        <span id="agent-header-model" class="text-secondary font-medium truncate max-w-[120px] sm:max-w-none">Cargando...</span>
       </div>
       <div class="px-2 sm:px-2.5 py-1 rounded bg-[#0b0f17] border border-[#1e293b] flex items-center gap-1.5 shrink-0">
         <span class="text-[#a58c7d]">TEMP:</span>
@@ -130,8 +130,14 @@ const { agentId } = Astro.props;
 </div>
 
 <script>
+  import { marked } from 'marked';
   import { apiClient } from '../services/client/apiClient';
   import type { RetrievedChunk } from '../types';
+
+  marked.setOptions({
+    gfm: true,
+    breaks: true
+  });
 
   const root = document.getElementById('chat-root');
   const agentId = Number(root?.dataset.agentId);
@@ -179,18 +185,42 @@ const { agentId } = Astro.props;
   tabChat?.addEventListener('click', () => switchMobileTab('chat'));
   tabCitations?.addEventListener('click', () => switchMobileTab('citations'));
 
+  let currentAgentModel = '';
+
+  function formatModelLabel(modelId?: string): string {
+    if (!modelId) return 'Workers AI';
+    if (modelId.includes('llama-4-scout')) return 'Llama 4 Scout';
+    if (modelId.includes('llama-3.1-8b')) return 'Llama 3.1 8B';
+    if (modelId.includes('mistral-7b')) return 'Mistral 7B';
+    const parts = modelId.split('/');
+    return parts[parts.length - 1] || modelId;
+  }
+
   async function loadAgentDetails() {
     try {
       const agent = await apiClient.getAgente(agentId);
+      currentAgentModel = agent.modelo;
       if (headerName) headerName.textContent = agent.nombre;
       if (headerRole) headerRole.textContent = `${agent.rol} | slug: ${agent.slug}`;
-      if (headerModel) headerModel.textContent = agent.modelo;
+      if (headerModel) {
+        headerModel.textContent = formatModelLabel(agent.modelo);
+        headerModel.title = agent.modelo;
+      }
       if (headerTemp) headerTemp.textContent = String(agent.temperatura ?? 0.2);
       if (headerDocs) headerDocs.textContent = String(agent.documentosCount ?? 0);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error al cargar detalles del agente';
       if (headerName) headerName.textContent = `Error: ${message}`;
     }
+  }
+
+  function escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   function appendUserMessage(text: string) {
@@ -202,27 +232,39 @@ const { agentId } = Astro.props;
         <span class="material-symbols-outlined text-[14px]">person</span>
         <span>Ciudadano / Consultante</span>
       </div>
-      <p class="whitespace-pre-wrap">${text}</p>
+      <p class="whitespace-pre-wrap">${escapeHtml(text)}</p>
     `;
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  function appendAgentMessage(text: string, isLiveAI: boolean) {
+  async function appendAgentMessage(text: string, isLiveAI: boolean, modelName?: string) {
     if (!chatMessages) return;
     const msgDiv = document.createElement('div');
     msgDiv.className = 'self-start max-w-[90%] p-3.5 rounded-lg bg-[#111827] border border-[#1e293b] text-[#dfe2ee] leading-relaxed';
+    
+    let renderedHtml = '';
+    try {
+      renderedHtml = await marked.parse(text);
+    } catch {
+      renderedHtml = escapeHtml(text);
+    }
+
+    const effectiveModel = modelName || currentAgentModel;
+    const modelLabel = formatModelLabel(effectiveModel);
+    const badgeText = isLiveAI ? `Workers AI • ${modelLabel}` : 'D1 Grounded Fallback';
+
     msgDiv.innerHTML = `
-      <div class="flex items-center justify-between gap-2 text-tertiary text-[10px] mb-1.5 font-bold">
+      <div class="flex items-center justify-between gap-2 text-tertiary text-[10px] mb-2 font-bold font-mono">
         <div class="flex items-center gap-1">
           <span class="material-symbols-outlined text-[14px]">gavel</span>
           <span>Respuesta Constitucional Grounded</span>
         </div>
-        <span class="text-[9px] px-1 py-0.2 rounded ${isLiveAI ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'}">
-          ${isLiveAI ? 'Workers AI Llama 3.1' : 'D1 Grounded Fallback'}
+        <span class="text-[9px] px-1.5 py-0.5 rounded ${isLiveAI ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'}" title="${escapeHtml(effectiveModel || '')}">
+          ${escapeHtml(badgeText)}
         </span>
       </div>
-      <div class="whitespace-pre-wrap leading-relaxed">${text}</div>
+      <div class="chat-markdown-body text-xs leading-relaxed font-sans">${renderedHtml}</div>
     `;
     chatMessages.appendChild(msgDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -279,14 +321,21 @@ const { agentId } = Astro.props;
     sendBtn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Pensando...</span>`;
 
     try {
-      const data = await apiClient.consultarRag(agentId, pregunta);
-      appendAgentMessage(data.respuesta, data.isLiveAI);
+      const data = (await apiClient.consultarRag(agentId, pregunta)) as {
+        respuesta: string;
+        isLiveAI: boolean;
+        citas?: RetrievedChunk[];
+        agente?: { modelo?: string };
+        modeloUsado?: string;
+      };
+      const modelUsed = data.modeloUsado || data.agente?.modelo || currentAgentModel;
+      await appendAgentMessage(data.respuesta, data.isLiveAI, modelUsed);
       if (data.citas) {
         renderCitations(data.citas);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error desconocido al consultar';
-      appendAgentMessage(`Error al consultar: ${message}`, false);
+      await appendAgentMessage(`Error al consultar: ${message}`, false);
     } finally {
       sendBtn.disabled = false;
       sendBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">send</span><span>Consultar</span>`;
@@ -307,3 +356,87 @@ const { agentId } = Astro.props;
 
   loadAgentDetails();
 </script>
+
+<style is:global>
+  .chat-markdown-body {
+    color: #dfe2ee;
+  }
+  .chat-markdown-body p {
+    margin-bottom: 0.75rem;
+  }
+  .chat-markdown-body p:last-child {
+    margin-bottom: 0;
+  }
+  .chat-markdown-body h1,
+  .chat-markdown-body h2,
+  .chat-markdown-body h3,
+  .chat-markdown-body h4 {
+    color: #ffb787;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+  .chat-markdown-body h1 { font-size: 1.15rem; }
+  .chat-markdown-body h2 { font-size: 1.05rem; }
+  .chat-markdown-body h3 { font-size: 0.95rem; }
+  .chat-markdown-body h4 { font-size: 0.875rem; }
+  .chat-markdown-body strong {
+    color: #ffffff;
+    font-weight: 700;
+  }
+  .chat-markdown-body em {
+    color: #4cd7f6;
+    font-style: italic;
+  }
+  .chat-markdown-body ul {
+    list-style-type: disc;
+    margin-left: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  .chat-markdown-body ol {
+    list-style-type: decimal;
+    margin-left: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  .chat-markdown-body li {
+    margin-bottom: 0.25rem;
+  }
+  .chat-markdown-body blockquote {
+    border-left: 3px solid #f38020;
+    padding-left: 0.75rem;
+    color: #94a3b8;
+    margin: 0.75rem 0;
+    font-style: italic;
+  }
+  .chat-markdown-body code {
+    background-color: #1e293b;
+    color: #4cd7f6;
+    padding: 0.15rem 0.35rem;
+    border-radius: 0.25rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85em;
+  }
+  .chat-markdown-body pre {
+    background-color: #0b0f17;
+    border: 1px solid #1e293b;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    overflow-x: auto;
+    margin: 0.75rem 0;
+  }
+  .chat-markdown-body pre code {
+    background-color: transparent;
+    padding: 0;
+    color: #4edea3;
+  }
+  .chat-markdown-body hr {
+    border: none;
+    border-top: 1px solid #1e293b;
+    margin: 1rem 0;
+  }
+  .chat-markdown-body a {
+    color: #4cd7f6;
+    text-decoration: underline;
+  }
+</style>

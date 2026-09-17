@@ -63,7 +63,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
     }
 
     const ragService = new RagService(docRepo, agentRepo, env.AI, env.VECTOR_INDEX);
-    const { response, contextChunks, isLiveAI } = await ragService.generateAnswer(
+    const { response, contextChunks, isLiveAI, modelUsed } = await ragService.generateAnswer(
       agentId,
       validation.data.pregunta,
       validation.data.stream
@@ -77,7 +77,8 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
-          'x-rag-chunks-count': String(contextChunks.length)
+          'x-rag-chunks-count': String(contextChunks.length),
+          'x-model-used': modelUsed || agent.modelo
         }
       });
     }
@@ -106,6 +107,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
           rol: agent.rol,
           modelo: agent.modelo
         },
+        modeloUsado: modelUsed || agent.modelo,
         pregunta: validation.data.pregunta,
         respuesta: respuestaFinal,
         citas: contextChunks,

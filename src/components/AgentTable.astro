@@ -416,6 +416,15 @@
       return;
     }
 
+    const formatModelName = (modelo?: string) => {
+      if (!modelo) return 'Llama 4 Scout';
+      if (modelo.includes('llama-4-scout')) return 'Llama 4 Scout';
+      if (modelo.includes('llama-3.1-8b')) return 'Llama 3.1 8B';
+      if (modelo.includes('mistral-7b')) return 'Mistral 7B';
+      const parts = modelo.split('/');
+      return parts[parts.length - 1] || modelo;
+    };
+
     if (tbody) {
       tbody.innerHTML = list
         .map((a) => {
@@ -443,7 +452,7 @@
               </td>
               <td class="py-3 px-4">
                 <div class="flex flex-col gap-0.5">
-                  <span class="font-mono text-[11px] text-secondary">${a.modelo || 'Llama 3.1 8B'}</span>
+                  <span class="font-mono text-[11px] text-secondary" title="${a.modelo || ''}">${formatModelName(a.modelo)}</span>
                   <span class="font-mono text-[10px] text-[#a58c7d]">Temp: ${a.temperatura ?? 0.2}</span>
                 </div>
               </td>
@@ -521,8 +530,8 @@
                   <span class="font-mono text-xs text-primary mt-0.5">${a.slug}</span>
                 </div>
                 <div class="flex flex-col items-end gap-0.5">
-                  <span class="px-2 py-0.5 rounded bg-[#0b0f17] border border-[#1e293b] text-[10px] font-mono text-secondary">
-                    ${a.modelo || 'Llama 3.1 8B'}
+                  <span class="px-2 py-0.5 rounded bg-[#0b0f17] border border-[#1e293b] text-[10px] font-mono text-secondary" title="${a.modelo || ''}">
+                    ${formatModelName(a.modelo)}
                   </span>
                   <span class="font-mono text-[10px] text-[#a58c7d]">Temp: ${a.temperatura ?? 0.2}</span>
                 </div>

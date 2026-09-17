@@ -273,9 +273,7 @@ Reglas obligatorias:
     // If Workers AI is configured, run model
     if (this.ai) {
       try {
-        const modelName = (agent.modelo && agent.modelo !== '@cf/meta/llama-3.1-8b-instruct')
-          ? agent.modelo
-          : '@cf/meta/llama-4-scout-17b-16e-instruct';
+        const modelName = agent.modelo || '@cf/meta/llama-4-scout-17b-16e-instruct';
 
         const response = await (this.ai as any).run(modelName, {
           messages: [
@@ -283,13 +281,15 @@ Reglas obligatorias:
             { role: 'user', content: pregunta }
           ],
           temperature: agent.temperatura ?? 0.2,
+          max_tokens: 2048,
           stream
         });
 
         return {
           response,
           contextChunks,
-          isLiveAI: true
+          isLiveAI: true,
+          modelUsed: modelName
         };
       } catch (err) {
         console.warn('[RAG] Workers AI execution error, falling back to simulated inference:', err);
@@ -297,14 +297,15 @@ Reglas obligatorias:
     }
 
     // Local deterministic inference fallback (ideal for test environments without Cloudflare token)
-    const simulatedAnswer = `De acuerdo con la Constitución Política de Colombia y la base normativa asignada a ${agent.nombre}:\n\n` +
-      contextChunks.map((c) => `En relación con **${c.titulo}**: "${c.contenido.substring(0, 280)}..."`).join('\n\n') +
-      `\n\nPor tanto, la consulta sobre "${pregunta}" queda fundamentada en las disposiciones constitucionales citadas.`;
+    const simulatedAnswer = `De acuerdo con la Constitución Política de Colombia y la base normativa asignada a **${agent.nombre}**:\n\n` +
+      contextChunks.map((c) => `### ${c.titulo}\n${c.contenido}`).join('\n\n') +
+      `\n\n---\n*Conclusión:* La consulta sobre "${pregunta}" queda fundamentada en las disposiciones constitucionales citadas anteriormente.`;
 
     return {
       response: simulatedAnswer,
       contextChunks,
-      isLiveAI: false
+      isLiveAI: false,
+      modelUsed: agent.modelo || 'fallback-local'
     };
   }
 }
