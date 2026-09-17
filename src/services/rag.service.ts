@@ -156,7 +156,24 @@ export class RagService {
       console.warn('[RAG] Error resolving agent domain skills:', err);
     }
 
-    // 1. Semantic search with Vectorize
+    // 1. Búsqueda Léxica en D1 FTS5 (ranking BM25 sobre texto normativo completo)
+    try {
+      const ftsMatches = await this.docRepo.searchFts(agenteId, pregunta, 3, dominios);
+      for (const fts of ftsMatches) {
+        if (!seenTitles.has(fts.tituloSeccion)) {
+          seenTitles.add(fts.tituloSeccion);
+          chunks.push({
+            titulo: fts.tituloSeccion,
+            contenido: fts.contenido,
+            origen: 'lexico'
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[RAG] FTS search fallback:', err);
+    }
+
+    // 2. Búsqueda Semántica con Vectorize (recuperación densa complementaria)
     if (this.ai && this.vectorIndex) {
       try {
         const queryEmbed: any = await this.ai.run('@cf/baai/bge-m3' as any, {
@@ -180,14 +197,16 @@ export class RagService {
 
               if (meta && (matchesAgent || matchesDomain)) {
                 const title = meta.titulo || 'Fragmento Constitucional';
-                seenTitles.add(title);
-                chunks.push({
-                  titulo: title,
-                  contenido: meta.contenido || `Referencia a ${title} (Score: ${match.score?.toFixed(4)})`,
-                  score: match.score,
-                  origen: 'vectorial',
-                  vectorId: match.id
-                });
+                if (!seenTitles.has(title)) {
+                  seenTitles.add(title);
+                  chunks.push({
+                    titulo: title,
+                    contenido: meta.contenido || `Referencia a ${title} (Score: ${match.score?.toFixed(4)})`,
+                    score: match.score,
+                    origen: 'vectorial',
+                    vectorId: match.id
+                  });
+                }
               }
             }
           }
@@ -195,23 +214,6 @@ export class RagService {
       } catch (err) {
         console.warn('[RAG] Semantic vector query skipped or local fallback:', err);
       }
-    }
-
-    // 2. Lexical search with D1 FTS5 (always executes and grounds exact articles)
-    try {
-      const ftsMatches = await this.docRepo.searchFts(agenteId, pregunta, 3, dominios);
-      for (const fts of ftsMatches) {
-        if (!seenTitles.has(fts.tituloSeccion)) {
-          seenTitles.add(fts.tituloSeccion);
-          chunks.push({
-            titulo: fts.tituloSeccion,
-            contenido: fts.contenido,
-            origen: 'lexico'
-          });
-        }
-      }
-    } catch (err) {
-      console.warn('[RAG] FTS search fallback:', err);
     }
 
     // 3. If no chunks found yet, retrieve most recent chunks of this agent or authorized domains

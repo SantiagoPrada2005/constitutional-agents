@@ -9,7 +9,8 @@
 		{
 			"binding": "DB",
 			"database_name": "bd_agentes",
-			"database_id": "00000000-0000-0000-0000-000000000000"
+			"database_id": "25cc2343-f594-4cba-b0a1-4a81952df61a",
+			"migrations_dir": "../../migrations"
 		}
 	],
 	"ai": {

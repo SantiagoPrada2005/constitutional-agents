@@ -20,6 +20,18 @@ export interface FtsSearchResult {
   contenido: string;
 }
 
+const SPANISH_STOPWORDS = new Set([
+  'de', 'la', 'que', 'el', 'en', 'y', 'a', 'los', 'del', 'se', 'las', 'por', 'un',
+  'para', 'con', 'no', 'una', 'su', 'al', 'lo', 'como', 'más', 'pero', 'sus', 'le',
+  'ya', 'o', 'fue', 'este', 'ha', 'sí', 'porque', 'esta', 'son', 'entre', 'está',
+  'cuando', 'muy', 'sin', 'sobre', 'también', 'me', 'hasta', 'hay', 'donde', 'quien',
+  'desde', 'todo', 'nos', 'durante', 'todos', 'uno', 'les', 'ni', 'contra', 'otros',
+  'ese', 'eso', 'ante', 'ellos', 'esto', 'mí', 'antes', 'algunos', 'qué', 'unos',
+  'otro', 'otras', 'otra', 'tanto', 'esa', 'estos', 'mucho', 'quienes', 'nada',
+  'muchos', 'cual', 'cuál', 'cuáles', 'sea', 'poco', 'ella', 'estar', 'haber',
+  'estas', 'estaba', 'estamos', 'algunas', 'algo', 'nosotros', 'cómo'
+]);
+
 export class DocumentRepository {
   constructor(private readonly db: AppDatabase) {}
 
@@ -89,7 +101,7 @@ export class DocumentRepository {
   }
 
   /**
-   * Search documents using FTS5 lexical match across agentId and/or authorized domains.
+   * Search documents using FTS5 lexical match across agentId and/or authorized domains with BM25 ranking.
    */
   async searchFts(
     agenteId: number,
@@ -97,30 +109,37 @@ export class DocumentRepository {
     limit = 3,
     dominios: string[] = ['transversal']
   ): Promise<FtsSearchResult[]> {
-    // Sanitize query by removing SQLite FTS5 syntax control characters
-    const sanitizedWords = rawQuery
+    // Sanitize query by removing punctuation and filtering Spanish stopwords
+    const tokens = rawQuery
+      .toLowerCase()
       .replace(/[^\p{L}\p{N}\s]/gu, ' ')
       .trim()
       .split(/\s+/)
-      .filter((w) => w.length > 2)
-      .map((w) => `"${w}"*`);
+      .filter((w) => w.length > 2);
 
-    if (sanitizedWords.length === 0) {
+    let filteredWords = tokens.filter((w) => !SPANISH_STOPWORDS.has(w));
+    if (filteredWords.length === 0) {
+      filteredWords = tokens; // fallback if all words were stopwords
+    }
+
+    if (filteredWords.length === 0) {
       return [];
     }
 
+    const sanitizedWords = filteredWords.map((w) => `"${w}"*`);
     const ftsQuery = sanitizedWords.join(' OR ');
 
     try {
       let querySql;
       if (dominios.includes('*')) {
-        // Agente general: busca en todo el corpus documental
+        // Agente general: busca en todo el corpus documental con ranking BM25
         querySql = sql`SELECT documento_id, agente_id, dominio, titulo_seccion, contenido 
             FROM fts_documentos 
             WHERE fts_documentos MATCH ${ftsQuery} 
+            ORDER BY bm25(fts_documentos) ASC
             LIMIT ${limit}`;
       } else {
-        // Agente especialista: busca por su agenteId O por los dominios autorizados
+        // Agente especialista: busca por su agenteId O por los dominios autorizados con ranking BM25
         const domainConditions = dominios.map((d) => sql`dominio = ${d}`);
         const domainClause = domainConditions.length > 0 
           ? sql.join(domainConditions, sql` OR `)
@@ -130,6 +149,7 @@ export class DocumentRepository {
             FROM fts_documentos 
             WHERE (agente_id = ${agenteId} OR ${domainClause}) 
               AND fts_documentos MATCH ${ftsQuery} 
+            ORDER BY bm25(fts_documentos) ASC
             LIMIT ${limit}`;
       }
 
