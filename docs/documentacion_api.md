@@ -2,7 +2,7 @@
 
 API REST desarrollada sobre Cloudflare Functions nativas integradas con Astro (modo SSR) para la administración y orquestación RAG de Agentes de IA especializados en la Constitución Política de Colombia de 1991.
 
-> **Consola Interactiva Swagger UI:** Disponible en [`/swagger`](file:///c:/Users/danna/constitutional-agents/src/pages/swagger.astro) o `/docs` para probar todas las rutas directamente en el navegador ("Try it out").
+> **Consola Interactiva Swagger UI:** Disponible en [`/swagger`](/swagger) o `/docs` para probar todas las rutas directamente en el navegador ("Try it out").
 > **Especificación OpenAPI 3.1 (JSON):** Disponible en `/api/openapi.json` o `/api/swagger.json`.
 
 ---
@@ -33,6 +33,9 @@ API REST desarrollada sobre Cloudflare Functions nativas integradas con Astro (m
 | `POST` | `/api/agentes/:id/conocimiento` | Ingestar e indexar archivo `.md` (D1 + Vectorize) | `201 Created`, `400`, `404` |
 | `POST` | `/api/agentes/:id/consultar` | Consulta RAG híbrida (Vectorize + FTS5 + Workers AI) | `200 OK`, `400`, `404`, `500` |
 | `GET` | `/api/habilidades` | Catálogo maestro de habilidades disponibles | `200 OK` |
+| `GET` | `/api/openapi.json` | Especificación técnica OpenAPI 3.1 en formato JSON | `200 OK` |
+| `GET` | `/api/swagger.json` | Alias estándar de la especificación Swagger OpenAPI | `200 OK` |
+| `GET` | `/swagger` (o `/docs`) | Consola interactiva Swagger UI ("Try it out" en vivo) | `200 OK` / `302` |
 
 ---
 
@@ -231,3 +234,11 @@ curl -X POST http://localhost:4321/api/agentes/1/consultar \
     "pregunta": "¿Qué artículo consagra la acción de tutela y en qué consiste?"
   }'
 ```
+
+---
+
+## 5. Autores y Colaboradores
+
+- **Santiago Prada**: Arquitectura de software, orquestación Edge, RAG híbrido y persistencia D1.
+- **Dana Sofía Arias**: Especificación OpenAPI 3.1, consola interactiva Swagger UI y documentación técnica.
+

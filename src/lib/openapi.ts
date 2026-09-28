@@ -22,7 +22,7 @@ Constitución Política de Colombia de 1991.
 - **Catálogo de Habilidades:** Habilidades maestras para el dominio constitucional y legal.
     `.trim(),
     contact: {
-      name: 'Equipo de Ingeniería Constitutional AI',
+      name: 'Santiago Prada & Dana Sofía Arias (Constitutional AI Team)',
       url: 'https://github.com/SantiagoPrada2005/constitutional-agents'
     },
     license: {

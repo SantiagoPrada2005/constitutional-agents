@@ -490,7 +490,7 @@ export const prerender = false;
     </main>
 
     <!-- Embedded OpenAPI Spec for immediate offline / zero-latency loading -->
-    <script id="swagger-spec-data" type="application/json" set:html={JSON.stringify(openApiSpec)} />
+    <script is:inline id="swagger-spec-data" type="application/json" set:html={JSON.stringify(openApiSpec)} />
 
     <!-- Swagger UI Dist Bundle Scripts -->
     <script is:inline src="https://unpkg.com/swagger-ui-dist@5.18.3/swagger-ui-bundle.js" charset="UTF-8"></script>

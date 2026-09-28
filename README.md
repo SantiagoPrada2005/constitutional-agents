@@ -8,6 +8,8 @@
 [![Wrangler](https://img.shields.io/badge/Wrangler-v4.132.0-F38020.svg?logo=cloudflare)](https://developers.cloudflare.com/workers/wrangler/)
 [![Drizzle ORM](https://img.shields.io/badge/Drizzle%20ORM-v0.45.2-C5F74F.svg?logo=drizzle)](https://orm.drizzle.team/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-v4.3.3-06B6D4.svg?logo=tailwindcss)](https://tailwindcss.com/)
+[![OpenAPI 3.1](https://img.shields.io/badge/OpenAPI-v3.1.0-6BA539.svg?logo=openapi-initiative)](https://swagger.io/)
+[![Swagger UI](https://img.shields.io/badge/Swagger%20UI-v5.18.3-85EA2D.svg?logo=swagger)](/swagger)
 [![TypeScript](https://img.shields.io/badge/TypeScript-v6.0.3-3178C6.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![Zod](https://img.shields.io/badge/Zod-v4.6.5-3E67B1.svg?logo=zod)](https://zod.dev/)
 [![pnpm](https://img.shields.io/badge/pnpm-v11.x-F69220.svg?logo=pnpm)](https://pnpm.io/)
@@ -84,11 +86,12 @@ La solución implementa un flujo unidireccional en 3 capas desacopladas:
 1. **Capa de Presentación (Astro v7 + Tailwind CSS v4):**
    - Modo de salida del servidor: `output: 'server'` procesado en el Worker runtime (`@astrojs/cloudflare` v14).
    - Estilizado de última generación mediante `@tailwindcss/vite` sin hojas de cálculo heredadas ni preprocesadores externos.
-   - Vistas modulares para visualización (`index.astro`), creación/edición (`nuevo.astro`) y chat conversacional (`chat/[id].astro`).
+   - Vistas modulares para visualización (`index.astro`), creación/edición (`nuevo.astro`), chat conversacional (`chat/[id].astro`) y consola interactiva de documentación Swagger UI (`swagger.astro` con alias `/docs`).
    - Abstracción de llamadas del cliente tipadas mediante `ApiClient`.
 
 2. **Capa de Lógica de Negocio y Controladores REST:**
    - Controladores HTTP aislados bajo `src/pages/api/`.
+   - Especificación técnica estandarizada OpenAPI 3.1 (`/api/openapi.json` y `/api/swagger.json`).
    - Validación estricta en tiempo de ejecución con **Zod v4** y esquemas sincronizados vía **Drizzle-Zod**.
    - `AgentService`: Orquestación del ciclo de vida del agente, validación de slugs únicos y resolución de relaciones N:M con habilidades.
    - `RagService`: Ingesta documental, chunking por encabezados Markdown, generación de embeddings multilingües y estrategia de inferencia con fallback local determinista.
@@ -124,9 +127,10 @@ constitutional-agents/
 │   │   ├── index.ts            # Fábrica del cliente Drizzle ORM sobre Cloudflare D1
 │   │   └── schema.ts           # Definición de tablas y relaciones con Drizzle
 │   ├── layouts/                # Plantillas maestras de navegación
-│   │   └── Layout.astro        # Layout base con soporte responsive y metaetiquetas
-│   ├── lib/                    # Utilidades de entorno
-│   │   └── env.ts              # Inyección y tipado del runtime Cloudflare en Astro
+│   │   └── Layout.astro        # Layout base con soporte responsive, drawer y links Swagger
+│   ├── lib/                    # Utilidades de entorno y especificaciones
+│   │   ├── env.ts              # Inyección y tipado del runtime Cloudflare en Astro
+│   │   └── openapi.ts          # Definición tipada exhaustiva de la especificación OpenAPI 3.1
 │   ├── pages/
 │   │   ├── api/                # Controladores HTTP de la API REST
 │   │   │   ├── agentes/
@@ -135,10 +139,14 @@ constitutional-agents/
 │   │   │   │   │   ├── consultar.ts    # Consulta conversacional con RAG
 │   │   │   │   │   └── index.ts        # GET por ID, PUT actualización, DELETE en cascada
 │   │   │   │   └── index.ts            # GET listado general, POST registro de agente
-│   │   │   └── habilidades.ts          # GET catálogo global de habilidades
+│   │   │   ├── habilidades.ts          # GET catálogo global de habilidades
+│   │   │   ├── openapi.json.ts         # Endpoint GET con la especificación OpenAPI 3.1
+│   │   │   └── swagger.json.ts         # Alias estándar GET /api/swagger.json
 │   │   ├── chat/[id].astro     # Consola de chat interactiva
+│   │   ├── docs.astro          # Redirección 302 hacia /swagger
 │   │   ├── index.astro         # Vista de inicio (Dashboard de agentes)
-│   │   └── nuevo.astro         # Vista de registro de nuevo agente
+│   │   ├── nuevo.astro         # Vista de registro de nuevo agente
+│   │   └── swagger.astro       # Consola interactiva Swagger UI con tema oscuro y testing en vivo
 │   ├── repositories/           # Patrón Repositorio para acceso a datos
 │   │   ├── agent.repository.ts
 │   │   └── document.repository.ts
@@ -257,6 +265,28 @@ fts_documentos USING fts5(documento_id UNINDEXED, agente_id UNINDEXED, titulo_se
 | `POST` | `/api/agentes/:id/conocimiento` | Ingestar documento Markdown, chunking y vectorización | `201`, `400`, `404` |
 | `POST` | `/api/agentes/:id/consultar` | Ejecutar consulta RAG híbrida contra el agente | `200`, `400`, `404` |
 | `GET` | `/api/habilidades` | Consultar el catálogo maestro de habilidades disponibles | `200` |
+| `GET` | `/api/openapi.json` | Especificación técnica OpenAPI 3.1 completa en formato JSON | `200` |
+| `GET` | `/api/swagger.json` | Alias estándar de la especificación Swagger OpenAPI | `200` |
+| `GET` | `/swagger` (o `/docs`) | Consola interactiva Swagger UI para ejecución de pruebas en vivo ("Try it out") | `200`, `302` |
+
+---
+
+## 📖 Documentación Interactiva y Consola Swagger UI
+
+El proyecto incorpora documentación técnica estandarizada y un portal interactivo de pruebas de última generación:
+
+1. **Consola Interactiva Swagger UI (`/swagger` o `/docs`):**
+   - Interfaz visual basada en tema oscuro integrada armónicamente con el diseño del sistema.
+   - Capacidad de pruebas interactivas (*"Try it out"*) ejecutadas directamente contra los endpoints del Worker en tiempo real.
+   - Documentación minuciosa de parámetros, payloads JSON, esquemas de respuesta y códigos de error HTTP.
+   - Carga instantánea de la especificación técnica OpenAPI 3.1 embebida sin sobrecargar la red.
+
+2. **Especificación OpenAPI 3.1 en JSON (`/api/openapi.json` / `/api/swagger.json`):**
+   - Archivo JSON estructurado y tipado bajo el estándar OpenAPI 3.1.0 (`src/lib/openapi.ts`).
+   - Compatible para importación inmediata en herramientas cliente como **Postman**, **Insomnia**, **Bruno** o pipelines de generación automática de SDKs tipados.
+
+3. **Accesibilidad en la Plataforma:**
+   - Enlace directo con indicador visual en el menú lateral de navegación (*sidebar*) y en la barra superior de acciones rápidas.
 
 ---
 
@@ -271,6 +301,7 @@ fts_documentos USING fts5(documento_id UNINDEXED, agente_id UNINDEXED, titulo_se
 | **Drizzle Kit** | `^0.31.10` | Herramienta de generación y ejecución de migraciones |
 | **Tailwind CSS** | `^4.3.3` | Motor de estilos utility-first moderno |
 | **@tailwindcss/vite** | `^4.3.3` | Integración nativa de Tailwind v4 en Vite |
+| **Swagger UI & OpenAPI** | `v5.18.3` / `v3.1.0` | Consola interactiva de pruebas y contratos de API REST |
 | **Zod** | `^4.6.5` | Validación de tipos y contratos en runtime |
 | **Drizzle Zod** | `^0.8.3` | Generación de esquemas Zod a partir de tablas Drizzle |
 | **TypeScript** | `^6.0.3` | Tipado estático estricto |
@@ -310,7 +341,7 @@ pnpm db:seed
 ```bash
 pnpm dev
 ```
-La aplicación estará disponible en `http://localhost:4321`.
+La aplicación estará disponible en `http://localhost:4321` y la consola Swagger UI en `http://localhost:4321/swagger`.
 
 ### 5. Ejecutar la batería de pruebas
 ```bash
@@ -319,11 +350,15 @@ pnpm test
 
 ---
 
-## 👤 Autor
+## 👥 Autores y Colaboradores
 
-**Santiago Prada**
-- GitHub: [@SantiagoPrada2005](https://github.com/SantiagoPrada2005)
-- Email: [santiagoprada@gmail.com](mailto:santiagoprada@gmail.com)
+- **Santiago Prada** (Autor Principal & Arquitectura)
+  - GitHub: [@SantiagoPrada2005](https://github.com/SantiagoPrada2005)
+  - Email: [santiagoprada@gmail.com](mailto:santiagopradamoreno@gmail.com)
+
+- **Dana Sofía Arias** (Colaboradora)
+  - Email: [sofiaamontes101@gmail.com](mailto:sofiaamontes101@gmail.com)
+  - Contribución: Especificación técnica OpenAPI 3.1, endpoints JSON (`/api/openapi.json`) e interfaz de documentación Swagger UI.
 
 ---
 

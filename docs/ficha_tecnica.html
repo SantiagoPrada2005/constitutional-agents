@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Constitutional Agents - Ficha Técnica y Descripción del Proyecto</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      line-height: 1.35;
+      font-size: 9.5px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      width: 210mm;
+      height: 297mm;
+      padding: 13mm 16mm 11mm 16mm;
+      box-sizing: border-box;
+      page-break-after: always;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      background: #ffffff;
+      overflow: hidden;
+    }
+
+    .page:last-child {
+      page-break-after: avoid;
+    }
+
+    .page-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* HEADER BANNER */
+    .hero-banner {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      border-radius: 9px;
+      padding: 14px 18px 12px 18px;
+      color: #ffffff;
+    }
+
+    .tag-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 9px;
+    }
+
+    .pill {
+      font-family: ui-monospace, Menlo, Monaco, "Segoe UI Mono", monospace;
+      font-size: 7.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2.5px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .pill-blue { background: #1e3a8a; color: #bfdbfe; border: 1px solid #2563eb; }
+    .pill-green { background: #064e3b; color: #a7f3d0; border: 1px solid #059669; }
+    .pill-orange { background: #7c2d12; color: #fed7aa; border: 1px solid #ea580c; }
+    .pill-slate { background: #1e293b; color: #cbd5e1; border: 1px solid #334155; }
+
+    .hero-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .hero-subtitle {
+      font-size: 9.5px;
+      color: #94a3b8;
+      font-weight: 400;
+      margin-bottom: 11px;
+      line-height: 1.4;
+    }
+
+    .hero-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .hero-link-box {
+      background: #111827;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 6px 9px;
+    }
+
+    .hero-link-label {
+      font-family: ui-monospace, Menlo, Monaco, monospace;
+      font-size: 7px;
+      color: #94a3b8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+    }
+
+    .hero-link-url {
+      font-family: ui-monospace, Menlo, Monaco, monospace;
+      font-size: 7.5px;
+      color: #38bdf8;
+      word-break: break-all;
+      line-height: 1.3;
+    }
+
+    .hero-link-url.orange {
+      color: #fb923c;
+    }
+
+    /* SECTION HEADERS */
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border-bottom: 1.5px solid #e2e8f0;
+      padding-bottom: 3px;
+      margin-bottom: 5px;
+      letter-spacing: -0.2px;
+    }
+
+    .section-desc {
+      font-size: 8.5px;
+      color: #475569;
+      line-height: 1.42;
+      margin-bottom: 6px;
+      text-align: justify;
+    }
+
+    /* 3 FEATURE CARDS */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 3px;
+    }
+
+    .feature-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #f38020;
+      border-radius: 6px;
+      padding: 7px 9px;
+    }
+
+    .feature-card:nth-child(2) {
+      border-left-color: #3b82f6;
+    }
+
+    .feature-card:nth-child(3) {
+      border-left-color: #10b981;
+    }
+
+    .feature-header {
+      font-size: 8.8px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .feature-body {
+      font-size: 7.6px;
+      color: #64748b;
+      line-height: 1.35;
+    }
+
+    /* TABLES */
+    .table-custom {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 7.8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 3px;
+    }
+
+    .table-custom th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      text-align: left;
+      padding: 4px 7px;
+      border-bottom: 1px solid #cbd5e1;
+      font-size: 7.8px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .table-custom td {
+      padding: 3.8px 7px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+      vertical-align: top;
+      line-height: 1.35;
+    }
+
+    .table-custom tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    .table-custom tr:last-child td {
+      border-bottom: none;
+    }
+
+    .code-badge {
+      font-family: ui-monospace, Menlo, Monaco, monospace;
+      font-size: 7.2px;
+      background: #e2e8f0;
+      color: #0f172a;
+      padding: 1px 3.5px;
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .code-badge-accent {
+      font-family: ui-monospace, Menlo, Monaco, monospace;
+      font-size: 7.2px;
+      background: #ffedd5;
+      color: #c2410c;
+      padding: 1px 3.5px;
+      border-radius: 3px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* CALLOUT BOX */
+    .callout-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 3px solid #3b82f6;
+      border-radius: 6px;
+      padding: 6px 9px;
+      font-size: 8px;
+      color: #1e40af;
+      line-height: 1.35;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .callout-box strong {
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+
+    /* CODE BOXES */
+    .code-box {
+      background: #0b1120;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 8px 11px;
+      color: #cbd5e1;
+      font-family: ui-monospace, Menlo, Monaco, monospace;
+      font-size: 7.2px;
+      line-height: 1.45;
+      white-space: pre;
+      overflow: hidden;
+      margin-bottom: 3px;
+    }
+
+    .code-comment { color: #64748b; font-style: italic; }
+    .code-keyword { color: #f43f5e; font-weight: 600; }
+    .code-func { color: #38bdf8; }
+    .code-str { color: #34d399; }
+    .code-var { color: #facc15; }
+
+    /* METHOD BADGES */
+    .method-get { color: #0284c7; font-weight: 700; font-family: ui-monospace, Menlo, monospace; font-size: 7.5px; }
+    .method-post { color: #16a34a; font-weight: 700; font-family: ui-monospace, Menlo, monospace; font-size: 7.5px; }
+    .method-put { color: #d97706; font-weight: 700; font-family: ui-monospace, Menlo, monospace; font-size: 7.5px; }
+    .method-delete { color: #dc2626; font-weight: 700; font-family: ui-monospace, Menlo, monospace; font-size: 7.5px; }
+
+    /* FOOTER */
+    .page-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 6px;
+      font-size: 7.2px;
+      color: #94a3b8;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* ACCESS BOXES */
+    .access-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.05fr;
+      gap: 7px;
+      margin-bottom: 5px;
+    }
+
+    .access-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+
+    .access-card-label {
+      font-family: ui-monospace, Menlo, Monaco, monospace;
+      font-size: 6.8px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .access-card-url {
+      font-family: ui-monospace, Menlo, Monaco, monospace;
+      font-size: 7px;
+      color: #2563eb;
+      word-break: break-all;
+      line-height: 1.3;
+    }
+
+    .access-card-url.orange {
+      color: #ea580c;
+      font-weight: 600;
+    }
+
+    .author-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 7.8px;
+      color: #334155;
+      line-height: 1.45;
+    }
+
+    .author-row {
+      margin-bottom: 3px;
+    }
+
+    .author-row strong {
+      color: #0f172a;
+    }
+
+    .author-divider {
+      border-top: 1px dashed #cbd5e1;
+      margin: 4px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== PÁGINA 1 ==================== -->
+  <div class="page">
+    <div class="page-body">
+      <!-- HERO BANNER -->
+      <div class="hero-banner">
+        <div class="tag-pills">
+          <span class="pill pill-blue">Constitutional Agents</span>
+          <span class="pill pill-green">En Producción</span>
+          <span class="pill pill-slate">Astro v7.3.2 SSR</span>
+          <span class="pill pill-slate">Cloudflare Workers Edge</span>
+          <span class="pill pill-slate">D1 SQLite + FTS5</span>
+          <span class="pill pill-slate">Vectorize RAG</span>
+          <span class="pill pill-slate">Llama 4 & BGE-M3</span>
+          <span class="pill pill-orange">OpenAPI 3.1 & Swagger UI</span>
+          <span class="pill pill-slate">TypeScript & Drizzle</span>
+        </div>
+
+        <h1 class="hero-title">Constitutional Agents</h1>
+        <p class="hero-subtitle">
+          Orquestador Serverless en el Edge de Agentes de Inteligencia Artificial especializados en Derecho Constitucional Colombiano (Constitución Política de 1991).
+        </p>
+
+        <div class="hero-links">
+          <div class="hero-link-box">
+            <div class="hero-link-label">Repositorio Oficial en GitHub</div>
+            <div class="hero-link-url">github.com/SantiagoPrada2005/constitutional-agents</div>
+          </div>
+          <div class="hero-link-box">
+            <div class="hero-link-label">Despliegue en Producción (Edge)</div>
+            <div class="hero-link-url">proyecto-agentes-ia.santiagopradamoreno.workers.dev</div>
+          </div>
+          <div class="hero-link-box">
+            <div class="hero-link-label">Consola Swagger UI Interactiva</div>
+            <div class="hero-link-url orange">...workers.dev/swagger (/docs)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 1 -->
+      <div>
+        <h2 class="section-title">📌 1. Descripción y Propósito del Proyecto</h2>
+        <p class="section-desc">
+          <strong>Constitutional Agents</strong> es una plataforma integral de gestión (CRUD), orquestación y consulta conversacional con <strong>Generación Aumentada por Recuperación (RAG)</strong> de agentes jurídicos autónomos. El sistema modela agentes cognitivos con instrucciones parametrizables, catálogo de habilidades normativas y un corpus constitucional estructurado que comprende los Principios Fundamentales, Derechos y Garantías (individuales, sociales, colectivos), Mecanismos de Participación y la Acción de Tutela.
+        </p>
+        <p class="section-desc">
+          Desarrollado bajo principios de <em>Clean Architecture</em>, opera al 100% en el borde (Edge Computing) sobre el ecosistema nativo de Cloudflare y Astro SSR, garantizando latencias mínimas en milisegundos, alta disponibilidad global y costo operativo cero en reposo.
+        </p>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-header">⚖️ Asesoría Jurídica Taxativa</div>
+            <div class="feature-body">Responde consultas legales con estricta sujeción a la Constitución de 1991, citando expresamente artículos, principios y garantías aplicables.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-header">📥 Ingesta y Segmentación</div>
+            <div class="feature-body">Chunking semántico de corpus normativo en Markdown por títulos y artículos, sincronizando índices vectoriales y relacionales en tiempo real.</div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-header">🔄 Pipeline RAG Híbrido</div>
+            <div class="feature-body">Estrategia dual: recuperación vectorial semántica con Cloudflare Vectorize combinada con búsqueda léxica SQLite FTS5 en Cloudflare D1.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2 -->
+      <div>
+        <h2 class="section-title">📐 2. Arquitectura del Sistema (Edge Native)</h2>
+        <p class="section-desc">
+          La solución implementa una arquitectura serverless desacoplada en tres dimensiones independientes, eliminando la necesidad de servidores dedicados o contenedores persistentes:
+        </p>
+
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Capa Arquitectónica</th>
+              <th style="width: 27%;">Tecnologías Clave</th>
+              <th style="width: 48%;">Responsabilidades y Patrones de Diseño</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Presentación (UI Islands)</strong></td>
+              <td>Astro v7.3 SSR, Tailwind CSS v4, TypeScript, Swagger UI</td>
+              <td>Renderizado en Worker (<span class="code-badge">output: 'server'</span>). Vistas para Dashboard de Agentes (<span class="code-badge">/</span>), Formulario de Gestión (<span class="code-badge">/nuevo</span>), Consola de Chat RAG (<span class="code-badge">/chat/[id]</span>) y Consola Interactiva Swagger UI (<span class="code-badge-accent">/swagger</span> con alias <span class="code-badge">/docs</span>). Cliente HTTP tipado (<span class="code-badge">apiClient</span>).</td>
+            </tr>
+            <tr>
+              <td><strong>2. Dominio y Controladores</strong></td>
+              <td>Astro Endpoints, Zod v4, Drizzle-Zod, OpenAPI 3.1</td>
+              <td>API REST modular (<span class="code-badge">/api/agentes</span>, <span class="code-badge">/api/habilidades</span>). Especificación técnica estandarizada (<span class="code-badge-accent">/api/openapi.json</span> y <span class="code-badge">/api/swagger.json</span>). Validación en runtime con esquemas Zod. <span class="code-badge">AgentService</span> para reglas de negocio y <span class="code-badge">RagService</span> para orquestación RAG y fallback determinista.</td>
+            </tr>
+            <tr>
+              <td><strong>3. Persistencia y Datos Edge</strong></td>
+              <td>Cloudflare D1, Vectorize, Workers AI, Drizzle ORM</td>
+              <td>Patrón Repositorio (<span class="code-badge">AgentRepository</span>, <span class="code-badge">DocumentRepository</span>). Base de datos relacional SQLite con triggers FTS5 e índice vectorial con distancia coseno para búsqueda semántica de alta fidelidad.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout-box">
+          <span style="font-size: 11px;">💡</span>
+          <div>
+            <strong>Desacoplamiento y Portabilidad:</strong> Las entidades del dominio y los repositorios están completamente aislados de los controladores HTTP. La sustitución del motor de inferencia o de almacenamiento relacional no impacta las reglas de negocio.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="page-footer">
+      <div>Constitutional Agents &bull; Ficha Técnica Oficial</div>
+      <div>Página 1 de 3</div>
+    </div>
+  </div>
+
+  <!-- ==================== PÁGINA 2 ==================== -->
+  <div class="page">
+    <div class="page-body">
+      <!-- SECCIÓN 3 -->
+      <div>
+        <h2 class="section-title">🔄 3. Pipeline RAG Constitucional Híbrido</h2>
+        <p class="section-desc">
+          El sistema mitiga eficazmente las alucinaciones en modelos de lenguaje mediante una estrategia de recuperación híbrida (semántica + léxica) y limitación estricta del contexto normativo:
+        </p>
+
+        <div style="font-size: 8px; color: #334155; line-height: 1.4; display: flex; flex-direction: column; gap: 4px;">
+          <div>
+            <strong>1. Ingesta y Chunking Semántico:</strong> La función <span class="code-badge">splitMarkdownIntoSections</span> fragmenta el corpus constitucional respetando jerarquía de títulos y artículos. Cada sección es vectorizada usando el modelo de embeddings <span class="code-badge">@cf/baai/bge-m3</span> en Cloudflare Workers AI e indexada en Cloudflare Vectorize con metadatos (<span class="code-badge">agente_id</span>, <span class="code-badge">titulo_seccion</span>, <span class="code-badge">nombre_archivo</span>).
+          </div>
+          <div>
+            <strong>2. Persistencia Dual y Triggers FTS5:</strong> El texto del fragmento se persiste en la tabla relacional <span class="code-badge">agente_documentos</span> en Cloudflare D1. Mediante tres triggers SQL automáticos (<span class="code-badge">trg_documentos_insert</span>, <span class="code-badge">update</span>, <span class="code-badge">delete</span>), la tabla virtual de búsqueda de texto completo <span class="code-badge">fts_documentos</span> se mantiene sincronizada sin intervención manual.
+          </div>
+          <div>
+            <strong>3. Recuperación Híbrida (<span class="code-badge">retrieveContext</span>):</strong>
+            <ul style="margin-left: 14px; margin-top: 2px;">
+              <li><strong>Paso Semántico:</strong> Inferencia de embeddings sobre la consulta del ciudadano y extracción de los fragmentos más afines (<span class="code-badge">topK: 3</span>) en Vectorize filtrados por el agente.</li>
+              <li><strong>Paso Léxico:</strong> Consulta de texto completo SQLite FTS5 en D1 para capturar menciones normativas literales (ej. "Artículo 86", "Acción de Tutela", "Habeas Data").</li>
+              <li><strong>Fusión y Deduplicación:</strong> Consolidación de candidatos suprimiendo redundancias y proveyendo inyección de respaldo determinista ante consultas atípicas.</li>
+            </ul>
+          </div>
+          <div>
+            <strong>4. Inferencia Jurídica Fundamentada:</strong> Generación del dictamen mediante <span class="code-badge">@cf/meta/llama-4-scout-17b-16e-instruct</span> a baja temperatura (<span class="code-badge">0.2</span>), gobernado por un system prompt que prohíbe emitir conceptos sin cita taxativa del marco normativo provisto.
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 4 -->
+      <div>
+        <h2 class="section-title">🗄️ 4. Modelo de Datos Relacional y Búsqueda Léxica</h2>
+        <p class="section-desc">
+          Esquema relacional implementado en Cloudflare D1 (SQLite) con integridad referencial, borrado en cascada y tabla virtual FTS5:
+        </p>
+
+        <div class="code-box"><span class="code-keyword">agentes</span> (id <span class="code-var">PK</span>, slug <span class="code-var">UNIQUE</span>, nombre, rol, modelo, temperatura, system_prompt, activo, created_at)
+<span class="code-keyword">habilidades</span> (id <span class="code-var">PK</span>, codigo <span class="code-var">UNIQUE</span>, nombre, descripcion)
+<span class="code-keyword">agente_habilidades</span> (agente_id <span class="code-func">FK</span> -> agentes, habilidad_id <span class="code-func">FK</span> -> habilidades, <span class="code-var">PK</span>(agente_id, habilidad_id))
+<span class="code-keyword">agente_documentos</span> (id <span class="code-var">PK</span>, agente_id <span class="code-func">FK</span> -> agentes, vector_id, nombre_archivo, titulo_seccion, contenido)
+<span class="code-keyword">fts_documentos</span> <span class="code-keyword">USING</span> fts5 (documento_id <span class="code-str">UNINDEXED</span>, agente_id <span class="code-str">UNINDEXED</span>, titulo_seccion, contenido)</div>
+      </div>
+
+      <!-- SECCIÓN 5 -->
+      <div>
+        <h2 class="section-title">📡 5. Matriz de Endpoints de la API REST y Swagger</h2>
+
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th style="width: 10%;">Método</th>
+              <th style="width: 32%;">Endpoint</th>
+              <th style="width: 44%;">Acción y Descripción Técnica</th>
+              <th style="width: 14%;">Códigos HTTP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="method-get">GET</span></td>
+              <td><span class="code-badge">/api/agentes</span></td>
+              <td>Listar todos los agentes registrados junto con sus habilidades asociadas</td>
+              <td><span class="code-badge">200</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-post">POST</span></td>
+              <td><span class="code-badge">/api/agentes</span></td>
+              <td>Registrar un nuevo agente, validar con Zod y vincular habilidades N:M</td>
+              <td><span class="code-badge">201, 400, 409</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-get">GET</span></td>
+              <td><span class="code-badge">/api/agentes/:id</span></td>
+              <td>Obtener detalle del agente, habilidades y catálogo de documentos indexados</td>
+              <td><span class="code-badge">200, 404</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-put">PUT</span></td>
+              <td><span class="code-badge">/api/agentes/:id</span></td>
+              <td>Actualizar configuración, parámetros LLM, prompts o habilidades</td>
+              <td><span class="code-badge">200, 400, 404</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-delete">DELETE</span></td>
+              <td><span class="code-badge">/api/agentes/:id</span></td>
+              <td>Eliminación en cascada del agente, sus relaciones y fragmentos asociados</td>
+              <td><span class="code-badge">200, 404</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-post">POST</span></td>
+              <td><span class="code-badge">/api/agentes/:id/conocimiento</span></td>
+              <td>Ingestar documento Markdown: fragmentación semántica y vectorización</td>
+              <td><span class="code-badge">201, 400, 404</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-post">POST</span></td>
+              <td><span class="code-badge">/api/agentes/:id/consultar</span></td>
+              <td>Ejecutar pipeline RAG híbrido conversacional contra el agente</td>
+              <td><span class="code-badge">200, 400, 404</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-get">GET</span></td>
+              <td><span class="code-badge">/api/habilidades</span></td>
+              <td>Consultar el catálogo maestro global de habilidades disponibles</td>
+              <td><span class="code-badge">200</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-get">GET</span></td>
+              <td><span class="code-badge-accent">/api/openapi.json</span></td>
+              <td>Especificación técnica OpenAPI 3.1 completa en formato JSON (contratos y DTOs)</td>
+              <td><span class="code-badge">200</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-get">GET</span></td>
+              <td><span class="code-badge-accent">/api/swagger.json</span></td>
+              <td>Alias estándar de la especificación Swagger OpenAPI para herramientas cliente</td>
+              <td><span class="code-badge">200</span></td>
+            </tr>
+            <tr>
+              <td><span class="method-get">GET</span></td>
+              <td><span class="code-badge-accent">/swagger</span> <span class="code-badge">(/docs)</span></td>
+              <td>Consola interactiva Swagger UI para ejecución de pruebas en vivo ("Try it out")</td>
+              <td><span class="code-badge">200, 302</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="page-footer">
+      <div>Constitutional Agents &bull; Ficha Técnica Oficial</div>
+      <div>Página 2 de 3</div>
+    </div>
+  </div>
+
+  <!-- ==================== PÁGINA 3 ==================== -->
+  <div class="page">
+    <div class="page-body">
+      <!-- SECCIÓN 6 -->
+      <div>
+        <h2 class="section-title">📦 6. Stack Tecnológico y Versiones Homologadas</h2>
+
+        <table class="table-custom">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Tecnología</th>
+              <th style="width: 18%;">Versión</th>
+              <th style="width: 57%;">Rol y Justificación Arquitectónica</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Astro</strong></td>
+              <td><span class="code-badge">v7.3.2</span></td>
+              <td>Framework SSR de alto rendimiento con arquitectura de islas y salida de servidor en el Edge.</td>
+            </tr>
+            <tr>
+              <td><strong>@astrojs/cloudflare</strong></td>
+              <td><span class="code-badge">v14.3.1</span></td>
+              <td>Adaptador oficial para Cloudflare Workers con compatibilidad <span class="code-badge">Node.js 2024-09-23</span>.</td>
+            </tr>
+            <tr>
+              <td><strong>Cloudflare Wrangler</strong></td>
+              <td><span class="code-badge">v4.132.0</span></td>
+              <td>Herramienta CLI para despliegue, emulación y gestión de infraestructura como código.</td>
+            </tr>
+            <tr>
+              <td><strong>Drizzle ORM & Kit</strong></td>
+              <td><span class="code-badge">v0.45.2 / v0.31.10</span></td>
+              <td>ORM TypeScript tipado de baja sobrecarga para Cloudflare D1 y gestión de migraciones DDL.</td>
+            </tr>
+            <tr>
+              <td><strong>Tailwind CSS & Vite</strong></td>
+              <td><span class="code-badge">v4.3.3</span></td>
+              <td>Motor de estilos de última generación integrado con Vite vía Lightning CSS sin dependencias obsoletas.</td>
+            </tr>
+            <tr>
+              <td><strong>Swagger UI & OpenAPI</strong></td>
+              <td><span class="code-badge-accent">v5.18.3 / v3.1.0</span></td>
+              <td>Especificación OpenAPI 3.1 exhaustiva y consola interactiva Swagger UI embebida ("Try it out").</td>
+            </tr>
+            <tr>
+              <td><strong>Zod & Drizzle-Zod</strong></td>
+              <td><span class="code-badge">v4.6.5 / v0.8.3</span></td>
+              <td>Validación tipada estricta en tiempo de ejecución para esquemas de entrada y contratos REST.</td>
+            </tr>
+            <tr>
+              <td><strong>TypeScript</strong></td>
+              <td><span class="code-badge">v6.0.3</span></td>
+              <td>Compilador estricto para garantizar solidez de tipos desde el cliente hasta la base de datos.</td>
+            </tr>
+            <tr>
+              <td><strong>pnpm</strong></td>
+              <td><span class="code-badge">v11.x (Mandatorio)</span></td>
+              <td>Gestor de paquetes exclusivo del workspace que garantiza lockfiles inmutables y deduplicación.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SECCIÓN 7 -->
+      <div>
+        <h2 class="section-title">🚀 7. Guía de Instalación y Puesta en Marcha</h2>
+        <p class="section-desc">
+          Pasos para clonar el repositorio, instalar dependencias con pnpm (estándar mandatorio) y ejecutar el entorno:
+        </p>
+
+        <div class="code-box"><span class="code-comment"># 1. Clonar el repositorio oficial de GitHub</span>
+git clone https://github.com/SantiagoPrada2005/constitutional-agents.git
+<span class="code-func">cd</span> constitutional-agents
+
+<span class="code-comment"># 2. Instalar dependencias mediante pnpm (estándar exclusivo)</span>
+pnpm install
+
+<span class="code-comment"># 3. Aplicar migraciones del esquema y semillero de datos iniciales en Cloudflare D1</span>
+pnpm db:migrate
+pnpm db:seed
+
+<span class="code-comment"># 4. Iniciar el entorno de desarrollo local en el puerto estándar</span>
+pnpm dev
+<span class="code-comment"># Aplicación interactiva: http://localhost:4321 • Consola Swagger UI: /swagger</span>
+
+<span class="code-comment"># 5. Ejecutar la suite automatizada de pruebas HTTP</span>
+pnpm test</div>
+      </div>
+
+      <!-- SECCIÓN 8 -->
+      <div>
+        <h2 class="section-title">🌐 8. Accesos Oficiales del Proyecto</h2>
+
+        <div class="access-grid">
+          <div class="access-card">
+            <div class="access-card-label">📁 Repositorio de Código</div>
+            <div class="access-card-url">github.com/SantiagoPrada2005/constitutional-agents</div>
+          </div>
+          <div class="access-card">
+            <div class="access-card-label">⚡ Despliegue en Producción</div>
+            <div class="access-card-url">proyecto-agentes-ia.santiagopradamoreno.workers.dev</div>
+          </div>
+          <div class="access-card">
+            <div class="access-card-label">📖 Consola Swagger UI</div>
+            <div class="access-card-url orange">...workers.dev/swagger (/docs)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 9 -->
+      <div>
+        <h2 class="section-title">👥 9. Autores, Colaboradores y Licencia de Uso</h2>
+
+        <div class="author-card">
+          <div class="author-row">
+            <strong>Desarrollado por:</strong> Santiago Prada &bull; <strong>GitHub:</strong> @SantiagoPrada2005 &bull; <strong>Email:</strong> santiagopradamoreno@gmail.com
+            <br />
+            <span style="color: #64748b; font-size: 7.2px;">Rol: Arquitectura de software, orquestación serverless en el Edge, pipeline RAG híbrido y persistencia D1.</span>
+          </div>
+          <div class="author-divider"></div>
+          <div class="author-row">
+            <strong>Colaboradora:</strong> Dana Sofía Arias &bull; <strong>Email:</strong> sofiaamontes101@gmail.com
+            <br />
+            <span style="color: #64748b; font-size: 7.2px;">Contribución: Especificación técnica OpenAPI 3.1.0, endpoints JSON y consola interactiva de documentación Swagger UI.</span>
+          </div>
+          <div class="author-divider"></div>
+          <div>
+            <strong>Licencia:</strong> Este proyecto se distribuye bajo los términos de la <strong>Licencia MIT</strong>. Código abierto y disponible para auditoría y reutilización académica y profesional.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="page-footer">
+      <div>Constitutional Agents &bull; Ficha Técnica Oficial</div>
+      <div>Página 3 de 3</div>
+    </div>
+  </div>
+
+</body>
+</html>

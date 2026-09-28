@@ -2,6 +2,13 @@
   "name": "proyecto-agentes-ia",
   "type": "module",
   "version": "1.0.0",
+  "author": "Santiago Prada <santiagopradamoreno@gmail.com>",
+  "contributors": [
+    {
+      "name": "Dana Sofía Arias",
+      "email": "sofiaamontes101@gmail.com"
+    }
+  ],
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
