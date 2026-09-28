@@ -159,6 +159,19 @@ const { title = 'Constitutional AI Agent Orchestrator', activePath = '/' } = Ast
             <span class="material-symbols-outlined text-[20px]">gavel</span>
             <span>RAG Constitucional</span>
           </a>
+
+          <a
+            href="/swagger"
+            class:list={[
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors min-h-[44px]',
+              activePath === '/swagger' || activePath === '/docs'
+                ? 'bg-[#f38020] text-[#0b0f17] font-semibold shadow-[0_0_12px_rgba(243,128,32,0.3)]'
+                : 'text-on-surface-variant hover:bg-[#181c24] hover:text-on-surface'
+            ]}
+          >
+            <span class="material-symbols-outlined text-[20px]">api</span>
+            <span>Documentación Swagger</span>
+          </a>
         </nav>
       </div>
 
@@ -216,6 +229,15 @@ const { title = 'Constitutional AI Agent Orchestrator', activePath = '/' } = Ast
         </div>
 
         <div class="flex items-center gap-2 sm:gap-3">
+          <a
+            href="/swagger"
+            class="hidden sm:inline-flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] text-slate-300 hover:text-white hover:border-[#f38020] px-2.5 py-1.5 rounded-lg text-xs font-mono transition-colors min-h-[36px]"
+            title="Consola interactiva Swagger UI"
+          >
+            <span class="material-symbols-outlined text-[16px] text-[#f38020]">terminal</span>
+            <span>Swagger API</span>
+          </a>
+
           <a
             href="/nuevo"
             class="inline-flex items-center gap-1.5 bg-primary-container text-on-primary px-3 py-1.5 rounded text-xs font-medium hover:bg-[#fb923c] transition-colors shadow-[0_0_12px_rgba(243,128,32,0.3)] min-h-[36px]"

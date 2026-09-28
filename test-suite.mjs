@@ -137,6 +137,41 @@ async function runTests() {
     failed++;
   }
 
+  // PRUEBA 6: Consultar especificación OpenAPI (GET /api/openapi.json)
+  try {
+    console.log('\n▸ PRUEBA 6: Consultar especificación técnica GET /api/openapi.json...');
+    const res = await fetch(`${BASE_URL}/api/openapi.json`);
+    const data = await res.json();
+    if (res.status === 200 && data.openapi && data.paths && data.paths['/api/agentes']) {
+      const endpointsCount = Object.keys(data.paths).length;
+      console.log(`  ✓ ÉXITO [HTTP 200 OK]: Especificación OpenAPI ${data.openapi} válida con ${endpointsCount} rutas documentadas.`);
+      passed++;
+    } else {
+      console.error(`  ✗ FALLÓ: Especificación inválida o status ${res.status}`, data);
+      failed++;
+    }
+  } catch (err) {
+    console.error('  ✗ ERROR en Prueba 6:', err.message);
+    failed++;
+  }
+
+  // PRUEBA 7: Consultar alias Swagger JSON (GET /api/swagger.json)
+  try {
+    console.log('\n▸ PRUEBA 7: Consultar alias estándar GET /api/swagger.json...');
+    const res = await fetch(`${BASE_URL}/api/swagger.json`);
+    const data = await res.json();
+    if (res.status === 200 && data.info && data.info.title) {
+      console.log(`  ✓ ÉXITO [HTTP 200 OK]: Alias Swagger responde correctamente con título: "${data.info.title}".`);
+      passed++;
+    } else {
+      console.error(`  ✗ FALLÓ: Alias falló con status ${res.status}`, data);
+      failed++;
+    }
+  } catch (err) {
+    console.error('  ✗ ERROR en Prueba 7:', err.message);
+    failed++;
+  }
+
   console.log('\n====================================================');
   console.log(` RESULTADO FINAL: ${passed} PASADAS / ${failed} FALLIDAS`);
   console.log('====================================================');

@@ -2,6 +2,9 @@
 
 API REST desarrollada sobre Cloudflare Functions nativas integradas con Astro (modo SSR) para la administración y orquestación RAG de Agentes de IA especializados en la Constitución Política de Colombia de 1991.
 
+> **Consola Interactiva Swagger UI:** Disponible en [`/swagger`](file:///c:/Users/danna/constitutional-agents/src/pages/swagger.astro) o `/docs` para probar todas las rutas directamente en el navegador ("Try it out").
+> **Especificación OpenAPI 3.1 (JSON):** Disponible en `/api/openapi.json` o `/api/swagger.json`.
+
 ---
 
 ## 1. Convenciones Generales

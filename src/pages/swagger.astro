@@ -1,0 +1,556 @@
+---
+import { openApiSpec } from '../lib/openapi';
+
+export const prerender = false;
+---
+
+<!doctype html>
+<html lang="es" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentación Interactiva API (Swagger UI) | Lex-Edge AI</title>
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preload" href="/fonts/material-symbols-outlined.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.18.3/swagger-ui.css" />
+
+    <style is:global>
+      @font-face {
+        font-family: 'Material Symbols Outlined';
+        font-style: normal;
+        font-weight: 100 700;
+        font-display: block;
+        src: url('/fonts/material-symbols-outlined.woff2') format('woff2');
+      }
+
+      .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined' !important;
+        font-weight: normal !important;
+        font-style: normal;
+        font-size: 20px;
+        line-height: 1;
+        display: inline-block;
+        white-space: nowrap;
+        vertical-align: middle;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #0b0f17;
+        color: #dfe2ee;
+        font-family: 'Geist', sans-serif;
+      }
+
+      .font-mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      /* Custom subtle scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0b0f17;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #262a33;
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #353942;
+      }
+
+      /* Swagger UI Dark & Cyberpunk Theme Overrides */
+      .swagger-ui {
+        color: #dfe2ee;
+        font-family: 'Geist', sans-serif;
+      }
+
+      .swagger-ui .wrapper {
+        max-width: 1200px;
+        padding: 0 16px;
+      }
+
+      .swagger-ui .info {
+        margin: 24px 0;
+      }
+
+      .swagger-ui .info .title {
+        color: #f8fafc;
+        font-family: 'Geist', sans-serif;
+        font-weight: 700;
+        font-size: 2rem;
+      }
+
+      .swagger-ui .info p,
+      .swagger-ui .info li,
+      .swagger-ui .info table {
+        color: #94a3b8;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .swagger-ui .info h1,
+      .swagger-ui .info h2,
+      .swagger-ui .info h3,
+      .swagger-ui .info h4 {
+        color: #e2e8f0;
+        font-weight: 600;
+      }
+
+      .swagger-ui .info a {
+        color: #f38020;
+      }
+
+      /* Filter and scheme section */
+      .swagger-ui .scheme-container {
+        background: #111827;
+        box-shadow: none;
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin: 20px 0;
+      }
+
+      .swagger-ui .schemes > label {
+        color: #94a3b8;
+      }
+
+      .swagger-ui .filter .operation-filter-input {
+        background: #0b0f17;
+        color: #f8fafc;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 8px 12px;
+      }
+
+      /* Tag header */
+      .swagger-ui .opblock-tag {
+        color: #f8fafc;
+        font-family: 'Geist', sans-serif;
+        border-bottom: 1px solid #1e293b;
+        padding: 16px 0;
+      }
+
+      .swagger-ui .opblock-tag small {
+        color: #94a3b8;
+      }
+
+      .swagger-ui .opblock-tag:hover {
+        color: #f38020;
+      }
+
+      /* Operation blocks */
+      .swagger-ui .opblock {
+        background: #111827 !important;
+        border: 1px solid #1e293b !important;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        margin: 0 0 16px 0;
+      }
+
+      .swagger-ui .opblock .opblock-summary {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 10px 16px;
+      }
+
+      .swagger-ui .opblock .opblock-summary-method {
+        border-radius: 6px;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        min-width: 80px;
+      }
+
+      .swagger-ui .opblock .opblock-summary-path {
+        color: #f1f5f9 !important;
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+      }
+
+      .swagger-ui .opblock .opblock-summary-description {
+        color: #94a3b8 !important;
+      }
+
+      /* Specific HTTP Method Accents */
+      .swagger-ui .opblock.opblock-get {
+        border-color: rgba(59, 130, 246, 0.3) !important;
+        background: rgba(15, 23, 42, 0.8) !important;
+      }
+      .swagger-ui .opblock.opblock-get .opblock-summary-method {
+        background: #2563eb !important;
+      }
+
+      .swagger-ui .opblock.opblock-post {
+        border-color: rgba(34, 197, 94, 0.3) !important;
+        background: rgba(15, 23, 42, 0.8) !important;
+      }
+      .swagger-ui .opblock.opblock-post .opblock-summary-method {
+        background: #16a34a !important;
+      }
+
+      .swagger-ui .opblock.opblock-put {
+        border-color: rgba(245, 158, 11, 0.3) !important;
+        background: rgba(15, 23, 42, 0.8) !important;
+      }
+      .swagger-ui .opblock.opblock-put .opblock-summary-method {
+        background: #d97706 !important;
+      }
+
+      .swagger-ui .opblock.opblock-delete {
+        border-color: rgba(239, 68, 68, 0.3) !important;
+        background: rgba(15, 23, 42, 0.8) !important;
+      }
+      .swagger-ui .opblock.opblock-delete .opblock-summary-method {
+        background: #dc2626 !important;
+      }
+
+      /* Expanded section inside an operation */
+      .swagger-ui .opblock-body {
+        background: #0e1420;
+        color: #cbd5e1;
+      }
+
+      .swagger-ui .opblock-section-header {
+        background: #161e2e;
+        border-bottom: 1px solid #1e293b;
+      }
+
+      .swagger-ui .opblock-section-header h4 {
+        color: #e2e8f0;
+        font-family: 'Geist', sans-serif;
+      }
+
+      .swagger-ui .tabli button {
+        color: #94a3b8;
+      }
+
+      .swagger-ui .tabli.active button {
+        color: #f38020;
+      }
+
+      /* Tables & Parameters */
+      .swagger-ui table thead tr td,
+      .swagger-ui table thead tr th {
+        color: #94a3b8;
+        border-bottom: 1px solid #1e293b;
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      .swagger-ui .parameter__name {
+        color: #f8fafc;
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      .swagger-ui .parameter__type {
+        color: #f38020;
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      .swagger-ui .parameter__in {
+        color: #64748b;
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      .swagger-ui table.parameters td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .swagger-ui select {
+        background: #111827;
+        color: #f8fafc;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        padding: 6px 10px;
+      }
+
+      .swagger-ui input[type=text] {
+        background: #0b0f17;
+        color: #f8fafc;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        padding: 8px 10px;
+      }
+
+      .swagger-ui textarea {
+        background: #0b0f17 !important;
+        color: #38bdf8 !important;
+        border: 1px solid #334155 !important;
+        border-radius: 8px;
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 13px !important;
+      }
+
+      /* Buttons */
+      .swagger-ui .btn {
+        border-radius: 6px;
+        font-family: 'Geist', sans-serif;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .swagger-ui .btn.try-out__btn {
+        background: #1e293b;
+        border: 1px solid #334155;
+        color: #f8fafc;
+      }
+
+      .swagger-ui .btn.try-out__btn:hover {
+        background: #334155;
+      }
+
+      .swagger-ui .btn.execute {
+        background: #f38020 !important;
+        border-color: #f38020 !important;
+        color: #0b0f17 !important;
+        font-weight: 700;
+        box-shadow: 0 0 15px rgba(243, 128, 32, 0.4);
+      }
+
+      .swagger-ui .btn.execute:hover {
+        background: #fb923c !important;
+      }
+
+      .swagger-ui .btn.cancel {
+        background: #334155;
+        border-color: #475569;
+        color: #f8fafc;
+      }
+
+      /* Responses */
+      .swagger-ui .responses-inner h4,
+      .swagger-ui .responses-inner h5 {
+        color: #e2e8f0;
+      }
+
+      .swagger-ui .response-col_status {
+        color: #f8fafc;
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      .swagger-ui .response-col_description {
+        color: #94a3b8;
+      }
+
+      .swagger-ui .highlight-code pre,
+      .swagger-ui .microlight {
+        background: #090d15 !important;
+        color: #e2e8f0 !important;
+        border: 1px solid #1e293b;
+        border-radius: 8px;
+        font-family: 'JetBrains Mono', monospace !important;
+      }
+
+      .swagger-ui .response-col_links {
+        color: #64748b;
+      }
+
+      /* Models Accordion */
+      .swagger-ui section.models {
+        background: #111827;
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        margin-top: 30px;
+      }
+
+      .swagger-ui section.models h4 {
+        color: #f8fafc;
+      }
+
+      .swagger-ui .model-box {
+        background: #0e1420;
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      .swagger-ui .model {
+        color: #cbd5e1;
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      .swagger-ui .model-title {
+        color: #f38020;
+      }
+
+      .swagger-ui .prop-type {
+        color: #38bdf8;
+      }
+
+      .swagger-ui .prop-format {
+        color: #a855f7;
+      }
+
+      /* Loading state indicator */
+      #swagger-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+        flex-direction: column;
+        gap: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top Navigation Bar -->
+    <header class="h-16 bg-[#0a0e16]/95 backdrop-blur-md border-b border-[#1e293b] sticky top-0 z-30 flex items-center justify-between px-4 sm:px-8">
+      <div class="flex items-center gap-3 sm:gap-4">
+        <a href="/" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
+          <img src="/logo.svg" alt="Constitutional AI Logo" class="h-8 w-8 object-contain" />
+          <div class="flex flex-col">
+            <span class="text-sm font-semibold text-white tracking-tight">Lex-Edge AI</span>
+            <span class="text-[10px] font-mono text-[#f38020] font-medium tracking-wider">SWAGGER OPENAPI 3.1</span>
+          </div>
+        </a>
+
+        <div class="hidden sm:flex items-center gap-2 bg-[#111827] border border-[#1e293b] px-3 py-1 rounded-lg font-mono text-xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-slate-400">ESPECIFICACIÓN:</span>
+          <span class="text-[#f38020] font-semibold">11 Endpoints REST</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a
+          href="/api/openapi.json"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] text-slate-300 hover:text-white hover:border-slate-500 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors"
+          title="Descargar o ver archivo OpenAPI 3.1 en formato JSON"
+        >
+          <span class="material-symbols-outlined text-[16px]">data_object</span>
+          <span class="hidden sm:inline">openapi.json</span>
+        </a>
+
+        <a
+          href="/chat/1"
+          class="inline-flex items-center gap-1.5 bg-[#111827] border border-[#1e293b] text-slate-300 hover:text-white hover:border-[#f38020] px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+        >
+          <span class="material-symbols-outlined text-[16px]">gavel</span>
+          <span class="hidden sm:inline">Probar RAG en Chat</span>
+        </a>
+
+        <a
+          href="/"
+          class="inline-flex items-center gap-1.5 bg-[#f38020] text-[#0b0f17] px-3.5 py-1.5 rounded-lg text-xs font-semibold hover:bg-[#fb923c] transition-colors shadow-[0_0_12px_rgba(243,128,32,0.3)]"
+        >
+          <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+          <span>Volver al Panel</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Sub-Hero Info Banner -->
+    <section class="border-b border-[#1e293b] bg-gradient-to-b from-[#0e1420] to-[#0b0f17] py-6 px-4 sm:px-8">
+      <div class="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 font-mono text-xs text-[#f38020] mb-1">
+            <span class="material-symbols-outlined text-[16px]">terminal</span>
+            <span>PORTAL INTERACTIVO DE PRUEBAS DE API</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            Documentación y Consola de Pruebas OpenAPI / Swagger
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
+            Ejecuta peticiones en tiempo real ("Try it out") contra la base de datos D1, el índice Vectorize
+            y los modelos de inferencia Workers AI. Todos los esquemas están tipados y validados.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 font-mono text-xs">
+          <div class="px-3 py-1.5 rounded-lg bg-[#111827] border border-[#1e293b] text-slate-300">
+            <span class="text-slate-500">BASE URL:</span> <span class="text-white font-semibold">/api</span>
+          </div>
+          <div class="px-3 py-1.5 rounded-lg bg-[#111827] border border-[#1e293b] text-slate-300">
+            <span class="text-slate-500">FORMATO:</span> <span class="text-emerald-400 font-semibold">JSON / SSE</span>
+          </div>
+          <div class="px-3 py-1.5 rounded-lg bg-[#111827] border border-[#1e293b] text-slate-300">
+            <span class="text-slate-500">AUTH:</span> <span class="text-amber-400 font-semibold">EDGE PUBLIC</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Swagger UI Mount Container -->
+    <main class="max-w-6xl mx-auto py-6 px-2 sm:px-4">
+      <div id="swagger-loading">
+        <div class="w-10 h-10 border-4 border-[#f38020] border-t-transparent rounded-full animate-spin"></div>
+        <p class="font-mono text-sm text-slate-400">Cargando consola Swagger UI...</p>
+      </div>
+
+      <div id="swagger-ui"></div>
+    </main>
+
+    <!-- Embedded OpenAPI Spec for immediate offline / zero-latency loading -->
+    <script id="swagger-spec-data" type="application/json" set:html={JSON.stringify(openApiSpec)} />
+
+    <!-- Swagger UI Dist Bundle Scripts -->
+    <script is:inline src="https://unpkg.com/swagger-ui-dist@5.18.3/swagger-ui-bundle.js" charset="UTF-8"></script>
+    <script is:inline src="https://unpkg.com/swagger-ui-dist@5.18.3/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+
+    <script is:inline>
+      window.addEventListener('DOMContentLoaded', () => {
+        const loadingEl = document.getElementById('swagger-loading');
+        let specData = null;
+
+        try {
+          const specElement = document.getElementById('swagger-spec-data');
+          if (specElement && specElement.textContent) {
+            specData = JSON.parse(specElement.textContent);
+          }
+        } catch (e) {
+          console.warn('[Swagger UI] Could not parse embedded spec:', e);
+        }
+
+        const uiConfig = {
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [
+            SwaggerUIBundle.presets.apis,
+            SwaggerUIStandalonePreset
+          ],
+          plugins: [
+            SwaggerUIBundle.plugins.DownloadUrl
+          ],
+          layout: 'BaseLayout',
+          docExpansion: 'list',
+          defaultModelsExpandDepth: 1,
+          defaultModelExpandDepth: 2,
+          displayRequestDuration: true,
+          filter: true,
+          tryItOutEnabled: true,
+          onComplete: () => {
+            if (loadingEl) {
+              loadingEl.style.display = 'none';
+            }
+          }
+        };
+
+        if (specData) {
+          uiConfig.spec = specData;
+        } else {
+          uiConfig.url = '/api/openapi.json';
+        }
+
+        try {
+          window.ui = SwaggerUIBundle(uiConfig);
+        } catch (err) {
+          console.error('[Swagger UI] Initialization error:', err);
+          if (loadingEl) {
+            loadingEl.innerHTML = `
+              <div class="text-rose-400 font-mono text-sm">Error cargando Swagger UI. Verifica la conexión a Internet o consulta <a href="/api/openapi.json" class="underline text-[#f38020]">/api/openapi.json</a></div>
+            `;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
